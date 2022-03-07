@@ -1,14 +1,16 @@
-# protolib
+# protolib - No the name is not fixed
 
 Support library for analyzing data from PSI pixel and strip detectors
 
 ### Aim
 
 * Make analyzing data from our detectors easier
-* Quicker to get started for new memebers
+* Quicker to get started for new members
 * Work well with ROOT...
 * ...and as well with Python
 * Usable as a c++ library
+* Value semantics
+* Limited (no?) manual memory management
 
 ### Dependencies
 
@@ -24,7 +26,7 @@ Support library for analyzing data from PSI pixel and strip detectors
 For python we use numpy arrays in C++ we might need our own image data container.
 
 ```cpp
-namespace pl = protolib; 
+#include <protolib/file.hpp>
 auto file = pl::open_file("run_master_0.raw")
 for (auto image : file)
     //do something
