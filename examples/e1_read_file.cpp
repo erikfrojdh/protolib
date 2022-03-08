@@ -15,7 +15,7 @@ int main() {
     fmt::print("Number of frames: {}\n", f.n_frames());
 
     for (int i = 0; i<10; ++i){
-        auto h = f.header(i);
+        auto h = f.read_header(i);
         fmt::print("Frame number {}\n", h.frameNumber);
     }
     

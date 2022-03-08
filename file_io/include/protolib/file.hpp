@@ -52,12 +52,12 @@ class RawFileObject : public FileObject {
        return n_frames_;
 
     }
-    Header header(size_t frame_number){
+    Header read_header(size_t frame_number){
         ifs.seekg((sizeof(Header)+sizeof(DataType)*Nrows*Ncols)*frame_number);
-        return header();
+        return read_header();
     }
 
-    Header header(){
+    Header read_header(){
         Header h{};
         ifs.read(reinterpret_cast<char*>(&h), sizeof(h));
         return h;
