@@ -1,5 +1,10 @@
 
 
-add_library(file_io INTERFACE)
-target_include_directories(file_io INTERFACE include)
-target_link_libraries(file_io INTERFACE project_options)
+add_library(file_io STATIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/RawFile.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/File.cpp
+)
+
+target_include_directories(file_io PUBLIC include)
+target_link_libraries(file_io PUBLIC project_options core array)
+set_target_properties(file_io PROPERTIES POSITION_INDEPENDENT_CODE ON)
