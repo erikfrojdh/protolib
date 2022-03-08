@@ -12,7 +12,7 @@ TODO! Add expression templates for operators
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>

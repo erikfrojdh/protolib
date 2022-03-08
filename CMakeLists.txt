@@ -2,10 +2,13 @@ cmake_minimum_required(VERSION 3.12)
 project(protolib)
 set(PROJECT_VERSION 0.0.1)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 #Should we force this on the top level?
 find_package(fmt)
 
 option(USE_SANITIZER "Sanitizers for debugging" OFF)
+option(USE_TESTS "Unit tests" ON)
 
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_17)
@@ -32,6 +35,11 @@ if(USE_SANITIZER)
     # target_link_libraries(project_options INTERFACE -fsanitize=thread)
 endif()
 
+if(USE_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
 add_subdirectory(core)
 add_subdirectory(array)
 add_subdirectory(file_io)
@@ -41,3 +49,4 @@ add_subdirectory(examples)
 find_package (Python 3.6 COMPONENTS Interpreter Development)
 find_package(pybind11)
 add_subdirectory(python)
+

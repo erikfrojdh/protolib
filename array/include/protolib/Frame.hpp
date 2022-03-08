@@ -13,16 +13,16 @@ Open:
 
 */
 class Frame{
-    size_t nrows;
-    size_t ncols;
+    ssize_t nrows;
+    ssize_t ncols;
     uint8_t bitdepth_;
     std::unique_ptr<std::byte[]> data_;
 
 public:
     Frame(size_t nr, size_t nc, uint8_t dr);
     double operator()(size_t row, size_t col);
-    size_t n_rows();
-    size_t n_cols();
+    ssize_t n_rows();
+    ssize_t n_cols();
     uint8_t bitdepth();
     std::byte* data();
     ImageData<double> to_double();

@@ -21,16 +21,16 @@ double Frame::operator()(size_t row, size_t col) {
     }
     return 3.14;
 }
-size_t Frame::n_rows() { return nrows; }
-size_t Frame::n_cols() { return ncols; }
+ssize_t Frame::n_rows() { return nrows; }
+ssize_t Frame::n_cols() { return ncols; }
 uint8_t Frame::bitdepth() { return bitdepth_; }
 
 std::byte *Frame::data() { return data_.get(); }
 
 ImageData<double> Frame::to_double() {
     ImageData<double> img({nrows, ncols});
-    for (size_t i = 0; i < nrows; ++i) {
-        for (size_t j = 0; j < ncols; ++j) {
+    for (ssize_t i = 0; i < nrows; ++i) {
+        for (ssize_t j = 0; j < ncols; ++j) {
             img(i, j) = (*this)(i, j);
         }
     }
