@@ -27,14 +27,15 @@ uint8_t Frame::bitdepth() { return bitdepth_; }
 
 std::byte *Frame::data() { return data_.get(); }
 
-ImageData<double> Frame::to_double() {
-    ImageData<double> img({nrows, ncols});
-    for (ssize_t i = 0; i < nrows; ++i) {
-        for (ssize_t j = 0; j < ncols; ++j) {
-            img(i, j) = (*this)(i, j);
-        }
-    }
-    return img;
+
+template<typename T>
+DataSpan<T,2> Frame::view(){
+    return DataSpan<T,2>(reinterpret_cast<T*>(data_.get()), std::array<ssize_t, 2>{nrows, ncols});
+
 }
+
+template DataSpan<uint8_t, 2> Frame::view<uint8_t>();
+template DataSpan<uint16_t, 2> Frame::view<uint16_t>();
+template DataSpan<uint32_t, 2> Frame::view<uint32_t>();
 
 } // namespace pl

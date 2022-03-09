@@ -32,6 +32,8 @@ target_compile_options(project_options INTERFACE
 if(USE_SANITIZER)
     target_compile_options(project_options INTERFACE -fsanitize=address,undefined -fno-omit-frame-pointer)
     target_link_libraries(project_options INTERFACE -fsanitize=address,undefined)
+
+    
     # target_compile_options(project_options INTERFACE -fsanitize=thread)
     # target_link_libraries(project_options INTERFACE -fsanitize=thread)
 endif()

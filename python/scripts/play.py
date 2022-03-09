@@ -1,16 +1,16 @@
 
-
 import _protolib as pl
-from pathlib import Path
+from _protolib import File
 
+import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 plt.ion()
 
-path = Path("/home/l_frojdh/software/hdf5maker/tests/data/run_master_16.raw")
-f = pl.File(path)
-img = f.read_frame()
-fig,ax = plt.subplots()
-im = ax.imshow(img)
-im.set_clim(0,8000)
+
+fpath =  pl.test_data_path()/"jungfrau/run_master_0.raw"
 
 
+f = File(fpath)
+arr = f.test_read()
+plt.imshow(arr)

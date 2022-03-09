@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "protolib/RawMasterFile.hpp"
+#include "protolib/File.hpp"
 
 using pl::RawMasterFile;
 
@@ -26,4 +27,12 @@ TEST_CASE("RawMasterFile parses basic file names with path"){
 TEST_CASE("Guessing if file is master from filename"){
     REQUIRE(pl::is_master_file("run_master_0.raw"));
     REQUIRE_FALSE(pl::is_master_file("master_d0_f1_0.raw"));
+}
+
+TEST_CASE("Parse an Eiger File"){
+    auto fpath = pl::test_data_path()/"eiger/run_master_0.raw";
+    RawMasterFile f(fpath);
+    //TODO! map<string, string>
+    pl::read_raw_master_file(fpath);
+
 }

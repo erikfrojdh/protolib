@@ -1,6 +1,7 @@
 
 
 import _protolib as pl
+from _protolib import File
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,11 +12,11 @@ path = Path("/Users/erik/data/clara/000_01-Mar-2022_110029/")
 fpath =  path/"run_master_0.raw"
 
 
-with pl.File(fpath) as f:
-    print(f'Total frames: {f.total_frames()}')
-    img = f.read_frame()
+with File(fpath) as f:
     data = f.read()
 
 
-# fig, ax = plt.subplots()
-# im = ax.imshow(img)
+fig, ax = plt.subplots(2,1)
+im = ax[0].imshow(data[10])
+ax[1].plot(data[:,50,50])
+

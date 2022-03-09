@@ -58,7 +58,7 @@ FileInfo read_raw_master_file(std::filesystem::path fpath) {
         if (key_pos != std::string::npos) {
             auto key = line.substr(0, key_pos + 1);
             auto value = line.substr(pos + 2);
-            // fmt::print("\"{}\": \"{}\"\n", key, value);
+            fmt::print("\"{}\": \"{}\"\n", key, value);
 
             // do the actual parsing
             if (key == "Total Frames") {

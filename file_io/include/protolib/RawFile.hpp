@@ -2,14 +2,10 @@
 #include "protolib/FileInfo.hpp"
 #include "protolib/ImageData.hpp"
 
+#include <cassert>
 #include <filesystem>
 #include <fstream>
-#include <cassert>
 namespace pl {
-
-
-
-
 
 // concrete class meant to hold a raw file
 //  *read header from the file
@@ -28,19 +24,18 @@ class RawFile {
         ifs.open(fname, std::ifstream::binary);
     }
 
-    RawFile(const RawFile&) = default;
-    RawFile& operator=(const RawFile&) = default;
-    RawFile(RawFile&&) = default;
-    RawFile& operator=(RawFile&&) = default;
+    RawFile(const RawFile &) = default;
+    RawFile &operator=(const RawFile &) = default;
+    RawFile(RawFile &&) = default;
+    RawFile &operator=(RawFile &&) = default;
     ~RawFile() = default;
-
 
     size_t n_frames() const { return n_frames_; }
 
-
-    void seek(size_t frame_number){
+    void seek(size_t frame_number) {
         if (frame_number >= n_frames_)
-            throw std::runtime_error("Requested frame number is larger than number of frames in file");
+            throw std::runtime_error("Requested frame number is larger than "
+                                     "number of frames in file");
 
         ifs.seekg((sizeof(Header) + sizeof(DataType) * Nrows * Ncols) *
                   frame_number);
@@ -53,10 +48,10 @@ class RawFile {
         return h;
     }
 
-    size_t tell(){
+    size_t tell() {
         auto pos = ifs.tellg();
         assert(pos % (sizeof(Header) + sizeof(DataType) * Nrows * Ncols) == 0);
-        return pos/(sizeof(Header) + sizeof(DataType) * Nrows * Ncols);
+        return pos / (sizeof(Header) + sizeof(DataType) * Nrows * Ncols);
     }
 
     Header read_header() {
@@ -67,19 +62,30 @@ class RawFile {
 
     size_t frame_number(size_t fn) { return read_header(fn).frameNumber; }
 
-    Header read_into(std::byte* buffer){
+    Header read_into(std::byte *buffer) {
         auto h = read_header();
-        ifs.read(reinterpret_cast<char *>(buffer), sizeof(DataType) * Nrows * Ncols);
+        ifs.read(reinterpret_cast<char *>(buffer),
+                 sizeof(DataType) * Nrows * Ncols);
         return h;
     }
 
-    ImageData<DataType> read_frame(){
+    std::vector<Header> read_into(std::byte *buffer, size_t n_frames) {
+        std::vector<Header> header(n_frames);
+        for (size_t i = 0; i != n_frames; ++i) {
+            const size_t frame_size =  sizeof(DataType) * Nrows * Ncols;
+            ifs.read(reinterpret_cast<char *>(&header[i]), sizeof(Header));
+            ifs.read(reinterpret_cast<char *>(buffer),
+                     sizeof(DataType) * Nrows * Ncols);
+            buffer += frame_size;
+        }
+        return header;
+    }
+
+    ImageData<DataType> read_frame() {
         ImageData<DataType> img({Nrows, Ncols});
         read_into(img.buffer());
         return img;
     }
-
-
 };
 
 using JungfrauRawFile = RawFile<sls_detector_header, uint16_t>;

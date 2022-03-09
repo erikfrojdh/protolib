@@ -3,6 +3,8 @@
 #pragma once
 #include <variant>
 #include <vector>
+
+#include "protolib/RawMasterFile.hpp"
 namespace pl {
 
 using Raw = std::variant<JungfrauRawFile>;
@@ -32,6 +34,15 @@ class RawFileWrapper : public FileWrapper {
             [image_buf](auto &f) {
                 auto h = f.read_into(image_buf);
                 fmt::print("Read frame: {}\n", h.frameNumber);
+            },
+            raw_files[0]);
+    }
+
+    void read_into(std::byte *image_buf, size_t n_frames) override{
+                std::visit(
+            [image_buf, n_frames](auto &f) {
+                auto h = f.read_into(image_buf, n_frames);
+                // fmt::print("Read frame: {}\n", h.frameNumber);
             },
             raw_files[0]);
     }

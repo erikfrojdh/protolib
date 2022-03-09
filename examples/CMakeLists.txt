@@ -18,3 +18,9 @@ target_link_libraries(e3 fmt::fmt file_io project_options)
 set_target_properties(e3 PROPERTIES 
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
+
+add_executable(e4 e4_iterate_file.cpp)
+target_link_libraries(e4 fmt::fmt file_io project_options)
+set_target_properties(e4 PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
