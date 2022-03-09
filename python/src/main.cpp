@@ -41,6 +41,11 @@ PYBIND11_MODULE(_protolib, m) {
         .def("total_frames", &pl::File::total_frames)
         .def("tell", &pl::File::tell)
         .def("seek", &pl::File::seek)
+        .def("__enter__", [](pl::File &self){return &self;} )
+        .def("__exit__", [](pl::File &self, const py::object &, const py::object &, const py::object &){
+            self.~File();
+            return 1;
+        } )
         .def("frame_number", &pl::File::frame_number)
         .def("read_frame", [](pl::File &self) {
             py::array image;

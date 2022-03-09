@@ -4,9 +4,26 @@
 using pl::RawMasterFile;
 
 TEST_CASE("RawMasterFile parses basic file names"){
-
     std::string fname = "run_master_0.raw";
-    RawMasterFile f(fname);
+    RawMasterFile f;
+    f.parse_fname(fname);
     REQUIRE(f.path() == "");
-    REQUIRE(f.raw_file(0,1)== "run_d0_f1_0.raw");
+    REQUIRE(f.data_fname(0,1)== "run_d0_f1_0.raw");
+    REQUIRE(f.data_fname(12,333)== "run_d12_f333_0.raw");
+    REQUIRE(f.data_fname(1,3)== "run_d1_f3_0.raw");
+    REQUIRE(f.data_fname(123,2)== "run_d123_f2_0.raw");
+}
+
+TEST_CASE("RawMasterFile parses basic file names with path"){
+    std::string fname = "/data/folder/run_master_32.raw";
+    RawMasterFile f;
+    f.parse_fname(fname);
+    REQUIRE(f.path() == "/data/folder");
+    REQUIRE(f.data_fname(1,2)== "/data/folder/run_d1_f2_32.raw");
+
+}
+
+TEST_CASE("Guessing if file is master from filename"){
+    REQUIRE(pl::is_master_file("run_master_0.raw"));
+    REQUIRE_FALSE(pl::is_master_file("master_d0_f1_0.raw"));
 }

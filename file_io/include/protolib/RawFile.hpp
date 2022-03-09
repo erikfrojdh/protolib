@@ -7,8 +7,6 @@
 #include <cassert>
 namespace pl {
 
-bool is_master_file(std::filesystem::path fpath);
-FileInfo read_raw_master_file(std::filesystem::path fpath);
 
 
 
@@ -29,12 +27,20 @@ class RawFile {
         n_frames_ = size_ / (sizeof(Header) + sizeof(DataType) * Nrows * Ncols);
         ifs.open(fname, std::ifstream::binary);
     }
+
+    RawFile(const RawFile&) = default;
+    RawFile& operator=(const RawFile&) = default;
+    RawFile(RawFile&&) = default;
+    RawFile& operator=(RawFile&&) = default;
+    ~RawFile() = default;
+
+
     size_t n_frames() const { return n_frames_; }
 
 
     void seek(size_t frame_number){
         if (frame_number >= n_frames_)
-            throw std::runtime_error("heeey");
+            throw std::runtime_error("Requested frame number is larger than number of frames in file");
 
         ifs.seekg((sizeof(Header) + sizeof(DataType) * Nrows * Ncols) *
                   frame_number);
@@ -49,9 +55,7 @@ class RawFile {
 
     size_t tell(){
         auto pos = ifs.tellg();
-        fmt::print("{}\n", pos);
         assert(pos % (sizeof(Header) + sizeof(DataType) * Nrows * Ncols) == 0);
-
         return pos/(sizeof(Header) + sizeof(DataType) * Nrows * Ncols);
     }
 
@@ -75,7 +79,7 @@ class RawFile {
         return img;
     }
 
-    ~RawFile() {}
+
 };
 
 using JungfrauRawFile = RawFile<sls_detector_header, uint16_t>;

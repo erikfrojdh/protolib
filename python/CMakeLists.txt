@@ -13,7 +13,7 @@ configure_file( scripts/play.py
     ${CMAKE_BINARY_DIR}/play.py 
 )
 
-configure_file( examples/e1_read_file.py  
-    ${CMAKE_BINARY_DIR}/e1_read_file.py 
+configure_file( examples/pyex1_read_file.py  
+    ${CMAKE_BINARY_DIR}/pyex1_read_file.py 
 )
 

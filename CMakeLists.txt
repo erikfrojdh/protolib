@@ -9,6 +9,7 @@ find_package(fmt)
 
 option(USE_SANITIZER "Sanitizers for debugging" OFF)
 option(USE_TESTS "Unit tests" ON)
+option(USE_PYTHON "Unit tests" ON)
 
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_17)
@@ -45,8 +46,9 @@ add_subdirectory(array)
 add_subdirectory(file_io)
 add_subdirectory(examples)
 
-
-find_package (Python 3.6 COMPONENTS Interpreter Development)
-find_package(pybind11)
-add_subdirectory(python)
+if(USE_PYTHON)
+    find_package (Python 3.6 COMPONENTS Interpreter Development)
+    find_package(pybind11)
+    add_subdirectory(python)
+endif()
 

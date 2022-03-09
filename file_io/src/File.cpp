@@ -1,5 +1,6 @@
 #include "protolib/File.hpp"
 #include "protolib/RawFile.hpp"
+#include "protolib/RawMasterFile.hpp"
 #include "protolib/RawFileWrappers.hpp"
 
 namespace pl {
@@ -7,15 +8,17 @@ namespace pl {
 File::File(std::filesystem::path fpath) {
     // Find file type
     if (fpath.extension() == ".raw" && is_master_file(fpath)) {
+        
+        //Do we need this knowledge here or can we ask the wrapper?
         meta = read_raw_master_file(fpath);
-
         if (meta.type == DetectorType::Jungfrau) {
             fmt::print("Jungfrau file\n");
             meta.bitdepth = 16;
         }
 
-        fp = std::make_unique<JungfrauFileWrapper>(
-            fpath.parent_path() / std::filesystem::path("run_d0_f0_16.raw"));
+        fp = std::make_unique<RawFileWrapper>(fpath);
+        // fp = std::make_unique<JungfrauFileWrapper>(
+        //     fpath.parent_path() / std::filesystem::path("run_d0_f0_16.raw"));
     }
 
     else {
