@@ -42,6 +42,11 @@ def full_read():
     # total = data[:,100,100].sum()
     return time.perf_counter()-t0
 
+def parse_file():
+    t0 = time.perf_counter()
+    f = File(fpath)
+    return time.perf_counter()-t0
+
 def iterate_using_numpy():
     t0 = time.perf_counter()
     total = 0
@@ -68,6 +73,7 @@ t_cpp = 0
 t_cpp_direct = 0
 t_cpp_custom = 0
 t_full_read = 0
+t_parse = 0
 for i in range(N):
     t_numpy += iterate_using_numpy()
     t_library += iterate_using_library()
@@ -76,6 +82,7 @@ for i in range(N):
     t_cpp_direct += cpp_direct()
     t_cpp_custom += cpp_custom()
     t_full_read += full_read()
+    t_parse += parse_file()
 
 print(f"Library: {t_library:.3}s")
 print(f"Numpy: {t_numpy:.3}s")
@@ -84,3 +91,4 @@ print(f"cpp: {t_cpp:.3}s")
 print(f"cpp direct: {t_cpp_direct:.3}s")
 print(f"cpp custom: {t_cpp_custom:.3}s")
 print(f"full_read: {t_full_read:.3}s")
+print(f"parse_file: {t_parse:.3}s")
