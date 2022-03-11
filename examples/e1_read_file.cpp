@@ -1,4 +1,3 @@
-
 #include <fmt/format.h>
 #include <filesystem>
 
@@ -15,6 +14,9 @@ int main() {
     File f(fpath);
     fmt::print("Frames: {}\n", f.total_frames());
 
+    //Read one frame into a generic "Frame" container
+    //Since we don't know the data type on compile time 
+    //the pixel access will be casted to double
     auto image = f.read_frame();
     fmt::print("pixel(100,100) = {}\n", image(100,100));
 

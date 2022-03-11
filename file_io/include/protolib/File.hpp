@@ -45,20 +45,29 @@ namespace impl{
 class File {
     std::unique_ptr<FileWrapper> fp;
     FileInfo meta;
-    
+
   public:
     File(std::filesystem::path fpath);
+    File(const File&) = delete;
+    File(File&&) = default;
+    File& operator=(const File&) = delete;
+    File& operator=(File&&) = default;
+    ~File() = default;
     size_t total_frames() const;
     void seek(size_t frame_number);
     size_t tell() const;
     size_t frame_number(size_t fn);
     std::array<size_t, 2> shape();
     uint8_t bitdepth();
+
+
+    //Reading
     Frame read_frame();
     void read_into(std::byte* image_buf);
     void read_into(std::byte* image_buf, size_t n_frames);
+    
+    
     size_t bytes_per_frame() const;
-
     using iterator = impl::FileIterator;
     iterator begin(){
         return iterator(this);

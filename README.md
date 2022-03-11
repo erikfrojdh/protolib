@@ -26,32 +26,32 @@ Support library for analyzing data from PSI pixel and strip detectors
 For python we use numpy arrays in C++ we might need our own image data container.
 
 ```cpp
-#include <protolib/file.hpp>
-auto file = pl::open_file("run_master_0.raw")
-for (auto image : file)
+#include <protolib/File.hpp>
+pl::File data_file("run_master_0.raw")
+for(auto& image : data_file)
     //do something
 
 ```
 
 
 ```python
-from protolib import open_file
-with open_file("run_master_0.raw") as f:
-    for image in f:
+from protolib import File
+with File("run_master_0.raw") as data_file:
+    for image in data_file:
         #do something
 
 ```
 
 ## Load everything into memory
 
-```cpp
+<!-- ```cpp
 auto data = pl::open_file("run_master_0.raw").read()
 for (auto& image : data)
     //do something
-```
+``` -->
 
 ```python
-with open_file("run_master_0.raw") as f:
+with File("run_master_0.raw") as f:
     data = f.read()
 ```
 
@@ -59,9 +59,8 @@ with open_file("run_master_0.raw") as f:
 
 ```cpp
 //Runtime depending on type of file
-auto f = pl::open_file("run_master_0.raw");
-auto image = f.read(1);
-
+File f("run_master_0.raw");
+auto image = f.read_frame();
 uint16_t pixel = image(120, 140);
 
 

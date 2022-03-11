@@ -2,7 +2,7 @@ pybind11_add_module(_protolib
     src/main.cpp 
 )
 
-target_link_libraries(_protolib PRIVATE fmt::fmt file_io array)
+target_link_libraries(_protolib PRIVATE fmt::fmt protolib project_options)
 
 set_target_properties(_protolib PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -25,7 +25,9 @@ endforeach()
 
 set(PythonExamples
     pyex1_read_file.py 
+    pyex2_jungfrau_file.py
     pyex4_iterate_file.py 
+    pyex5_iterate_benchmark.py
 )
 
 foreach(FILE ${PythonExamples})

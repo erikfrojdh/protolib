@@ -29,10 +29,24 @@ TEST_CASE("Guessing if file is master from filename"){
     REQUIRE_FALSE(pl::is_master_file("master_d0_f1_0.raw"));
 }
 
-TEST_CASE("Parse an Eiger File"){
+TEST_CASE("Parse an Eiger 500k File"){
     auto fpath = pl::test_data_path()/"eiger/run_master_0.raw";
     RawMasterFile f(fpath);
+
+    REQUIRE(f.version() == "6.3");
+    //Timestamp
+    REQUIRE(f.type() == pl::DetectorType::Eiger);
+    REQUIRE(f.timing_mode() == pl::TimingMode::Auto);
+    //size
+    //pixels
+    REQUIRE(f.subfile_cols() == 512);
+    REQUIRE(f.subfile_rows() == 256);
+
+    REQUIRE(f.n_subfiles() == 4);
+    REQUIRE(f.total_frames() == 1);
+
+    REQUIRE(f.bitdepth() == 32);
     //TODO! map<string, string>
-    pl::read_raw_master_file(fpath);
+    // pl::read_raw_master_file(fpath);
 
 }

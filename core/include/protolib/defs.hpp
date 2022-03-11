@@ -22,17 +22,16 @@ typedef struct {
 
 enum class DetectorType { Jungfrau, Eiger, Mythen };
 
-template <class T> DetectorType StringTo(std::string_view name) {
-    if (name == "Jungfrau")
-        return DetectorType::Jungfrau;
-    else if (name == "Eiger")
-        return DetectorType::Eiger;
-    else if (name == "Mythen")
-        return DetectorType::Mythen;
-    else {
-        auto msg = fmt::format("Could not decode dector from: \"{}\"", name);
-        throw std::runtime_error(msg);
-    }
+enum class TimingMode {Auto, Trigger};
+
+template<class T> 
+T StringTo(std::string_view sv){
+    return T(sv);
 }
+
+template <> DetectorType StringTo(std::string_view name);
+
+template <>TimingMode StringTo(std::string_view mode);
+
 
 } // namespace pl

@@ -10,6 +10,7 @@ find_package(fmt)
 option(USE_SANITIZER "Sanitizers for debugging" OFF)
 option(USE_TESTS "Unit tests" ON)
 option(USE_PYTHON "Unit tests" ON)
+option(TUNE_LOCAL "local arch" ON)
 
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_17)
@@ -29,22 +30,37 @@ target_compile_options(project_options INTERFACE
                                             -Werror=return-type
                                  )
 
+#Enable LTO if available
+include(CheckIPOSupported)
+check_ipo_supported(RESULT LTO_AVAILABLE)
+if((CMAKE_BUILD_TYPE STREQUAL "Release") AND  LTO_AVAILABLE)
+    message(STATUS "Building with link time optimization")
+else()
+    message(STATUS "Building without link time optimization")
+endif()
+
 if(USE_SANITIZER)
     target_compile_options(project_options INTERFACE -fsanitize=address,undefined -fno-omit-frame-pointer)
-    target_link_libraries(project_options INTERFACE -fsanitize=address,undefined)
-
-    
+    target_link_libraries(project_options INTERFACE -fsanitize=address,undefined)    
     # target_compile_options(project_options INTERFACE -fsanitize=thread)
     # target_link_libraries(project_options INTERFACE -fsanitize=thread)
 endif()
+
+if(TUNE_LOCAL)
+    target_compile_options(project_options INTERFACE -mtune=native )
+endif()
+
+add_library(protolib STATIC)
+
 
 if(USE_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
 
-add_subdirectory(core)
+
 add_subdirectory(array)
+add_subdirectory(core)
 add_subdirectory(file_io)
 add_subdirectory(examples)
 
@@ -54,3 +70,5 @@ if(USE_PYTHON)
     add_subdirectory(python)
 endif()
 
+target_link_libraries(protolib PRIVATE fmt::fmt project_options)
+set_property(TARGET protolib PROPERTY INTERPROCEDURAL_OPTIMIZATION True)

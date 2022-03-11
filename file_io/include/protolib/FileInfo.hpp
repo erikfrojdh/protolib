@@ -7,17 +7,17 @@
 namespace pl{
 
 struct FileInfo {
-    size_t n_frames{};
-    size_t n_rows{};
-    size_t n_cols{};
+    size_t total_frames{};
+    size_t rows{};
+    size_t cols{};
     uint8_t bitdepth{};
     DetectorType type{};
 
     size_t bytes_per_frame() const{
-        return n_rows*n_cols*bitdepth/8;
+        return rows*cols*bitdepth/8;
     }
     size_t pixles() const{
-        return n_rows*n_cols;
+        return rows*cols;
     }
 };
 
