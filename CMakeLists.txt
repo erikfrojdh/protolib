@@ -28,6 +28,7 @@ target_compile_options(project_options INTERFACE
                                             -Wvla
                                             -Wdouble-promotion
                                             -Werror=return-type
+                                            -fuse-linker-plugin
                                  )
 
 #Enable LTO if available
@@ -70,5 +71,6 @@ if(USE_PYTHON)
     add_subdirectory(python)
 endif()
 
+# set_property(TARGET protolib PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
+set_property(TARGET protolib PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(protolib PRIVATE fmt::fmt project_options)
-set_property(TARGET protolib PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
