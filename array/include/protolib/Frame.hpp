@@ -30,8 +30,8 @@ public:
     Frame(Frame&&) = default;
     
     double operator()(size_t row, size_t col);
-    ssize_t n_rows();
-    ssize_t n_cols();
+    ssize_t rows();
+    ssize_t cols();
     uint8_t bitdepth();
     std::byte* data();
 

@@ -21,8 +21,8 @@ double Frame::operator()(size_t row, size_t col) {
     }
     return 3.14;
 }
-ssize_t Frame::n_rows() { return nrows; }
-ssize_t Frame::n_cols() { return ncols; }
+ssize_t Frame::rows() { return nrows; }
+ssize_t Frame::cols() { return ncols; }
 uint8_t Frame::bitdepth() { return bitdepth_; }
 
 std::byte *Frame::data() { return data_.get(); }

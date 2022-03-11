@@ -9,14 +9,24 @@ int main() {
     using pl::RawMasterFile;
     namespace fs = std::filesystem;
 
-    //This would be a jungfrau file with 100 frames
-    fs::path fpath = pl::test_data_path()/"eiger/run_master_0.raw";
-    // fs::path fpath = pl::test_data_path()/"jungfrau/run_master_0.raw";
+    //Find an Eiger frame
+    fs::path fpath = pl::test_data_path()/"eiger/sample_master_2.raw";
+    
+    File f(fpath);
+    auto image = f.read_frame();
 
-    RawMasterFile file(fpath); 
-    // double total = 0;
-    // for(auto& image : file){
-    //     total += image(100,100);
-    // }
-    // fmt::print("The sum of pixel 100,100 is {}\n", total);
+    fmt::print("Shape: {}x{}\n", image.rows(), image.cols());
+    fmt::print("Frames: {}\n", f.total_frames());
+    
+
+    // This way of summing is not the most efficient
+    // since we cast to a double before summing. If 
+    // performance matters use a typed interface. 
+    double sum=0;
+    for (ssize_t row=0; row != image.rows(); ++row){
+        for (ssize_t col = 0; col != image.cols(); ++col){
+            sum += image(row, col);
+        }
+    }
+    fmt::print("Sum of image: {}\n", sum);
 }

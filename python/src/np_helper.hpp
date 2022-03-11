@@ -38,25 +38,25 @@ py::array return_frame(pl::Frame *ptr) {
     uint8_t dr = ptr->bitdepth();
     if (dr == 8)
         return py::array_t<uint8_t>(
-            std::array<ssize_t, 2>{ptr->n_rows(), ptr->n_cols()}, // shape
+            std::array<ssize_t, 2>{ptr->rows(), ptr->cols()}, // shape
             std::array<ssize_t, 2>{
-                ptr->n_cols() * dr / 8,
+                ptr->cols() * dr / 8,
                 dr / 8}, // C-style contiguous strides for double
             reinterpret_cast<uint8_t *>(ptr->data()), // the data pointer
             free_when_done); // numpy array references this parent
     else if (dr == 16)
         return py::array_t<uint16_t>(
-            std::array<ssize_t, 2>{ptr->n_rows(), ptr->n_cols()}, // shape
+            std::array<ssize_t, 2>{ptr->rows(), ptr->cols()}, // shape
             std::array<ssize_t, 2>{
-                ptr->n_cols() * dr / 8,
+                ptr->cols() * dr / 8,
                 dr / 8}, // C-style contiguous strides for double
             reinterpret_cast<uint16_t *>(ptr->data()), // the data pointer
             free_when_done); // numpy array references this parent
     else if (dr == 32)
         return py::array_t<uint32_t>(
-            std::array<ssize_t, 2>{ptr->n_rows(), ptr->n_cols()}, // shape
+            std::array<ssize_t, 2>{ptr->rows(), ptr->cols()}, // shape
             std::array<ssize_t, 2>{
-                ptr->n_cols() * dr / 8,
+                ptr->cols() * dr / 8,
                 dr / 8}, // C-style contiguous strides for double
             reinterpret_cast<uint32_t *>(ptr->data()), // the data pointer
             free_when_done); // numpy array references this parent

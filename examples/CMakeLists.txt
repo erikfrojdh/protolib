@@ -10,7 +10,7 @@ set(ExampleSrc
 )
 
 foreach(FILE ${ExampleSrc})
-    get_filename_component(EXENAME ${FILE} NAME)
+    get_filename_component(EXENAME ${FILE} NAME_WE)
     add_executable(${EXENAME} ${FILE})
     target_link_libraries(${EXENAME} fmt::fmt protolib project_options)
     set_target_properties(${EXENAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

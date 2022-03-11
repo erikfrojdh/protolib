@@ -47,7 +47,7 @@ if(USE_SANITIZER)
 endif()
 
 if(TUNE_LOCAL)
-    target_compile_options(project_options INTERFACE -mtune=native )
+    target_compile_options(project_options INTERFACE -march=native -mtune=native )
 endif()
 
 add_library(protolib STATIC)
