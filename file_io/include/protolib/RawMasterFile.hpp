@@ -86,7 +86,7 @@ template<typename Header=sls_detector_header>
 Header read_header(const fs::path fname){
     
     Header h{};
-    FILE* fp = fp = fopen(fname.c_str(), "r");
+    FILE* fp = fopen(fname.c_str(), "r");
     if(!fp)
         throw std::runtime_error(fmt::format("Could not open: {} for reading", fname.c_str()));
     
