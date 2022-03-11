@@ -25,13 +25,40 @@ struct crtp
 };
 
 
+class FilePtr{
+    FILE* fp_{nullptr};
+    public:
+        FilePtr() = default;
+        FilePtr(const fs::path& fname){
+            fp_ = fopen(fname.c_str(), "r");
+            if(!fp_)
+                throw std::runtime_error(fmt::format("Could not open: {}", fname.c_str()));
+        }
+        FilePtr(const FilePtr&) = delete;               //we don't want a copy
+        FilePtr& operator=(const FilePtr&) = delete;    //since we handle a resource
+        
+        FilePtr(FilePtr&& other){
+            std::swap(fp_, other.fp_);
+        }
+        
+        FilePtr& operator=(FilePtr&& other){
+            std::swap(fp_, other.fp_);
+            return *this;
+        }
+
+        FILE* get(){
+            return fp_;
+        }
+        ~FilePtr(){
+            if(fp_)
+                fclose(fp_); //check?
+        }
+};
 
 template <class Header, class DataType, class T> class RawFile : public crtp<T> {
 
-
  protected:
-    std::unique_ptr<FILE> fp{nullptr}; // faster compared to ifstream
-
+    FilePtr fp;
     const ssize_t rows_{};
     const ssize_t cols_{};
     const size_t n_frames_{};
@@ -40,20 +67,18 @@ template <class Header, class DataType, class T> class RawFile : public crtp<T> 
     using value_type = DataType;
 
     RawFile(fs::path fname, ssize_t rows, ssize_t cols)
-        : rows_(rows), cols_(cols),
+        : fp(fname), rows_(rows), cols_(cols),
           n_frames_(fs::file_size(fname) /
                     (sizeof(Header) + sizeof(DataType) * rows_ * cols_)) {
-        fp = std::make_unique<FILE>(*fopen(fname.c_str(), "r"));
+
     }
 
-    RawFile(const RawFile &) = default;
-    RawFile &operator=(const RawFile &) = default;
+    RawFile(const RawFile &) = delete;
+    RawFile &operator=(const RawFile &) = delete;
     RawFile(RawFile &&) = default;
     RawFile &operator=(RawFile &&) = default;
-    ~RawFile(){
-        if(fp)
-            fclose(fp.get());
-    };
+    ~RawFile() = default;
+
     size_t n_frames() const { return n_frames_; }
 
     void seek(size_t frame_number) {
