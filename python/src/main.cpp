@@ -39,51 +39,7 @@ PYBIND11_MODULE(_protolib, m) {
 
     )pbdoc";
 
-    m.def("test", []() {
-        auto image_ptr = new pl::ImageData<double>({15, 30});
-        return return_image_data(image_ptr);
-    });
-
-    m.def("test_data_path", &pl::test_data_path);
-
-    m.def("call_overhead", [](){return 5;});
-
-    m.def("sum_pixel", [](fs::path p){
-        pl::File f(p);
-        double total = 0;
-        for (auto& frame : f)
-            total += frame(100,100);
-        return total;
-    });
-
-    m.def("clean_read", [](fs::path p){
-        int fd;
-        fd = open(p.c_str(), O_RDONLY);
-        double total = 0;
-        constexpr size_t frame_size = 512*1024*2;
-        constexpr size_t header_size = 112;
-        constexpr size_t pos = (1024*100+100)*2;
-        std::byte* buffer = new std::byte[frame_size];
-        for(int i = 0; i!=100; ++i){
-            lseek (fd, header_size, SEEK_CUR);
-            read(fd, reinterpret_cast<char*>(buffer), frame_size);
-            total += *reinterpret_cast<uint16_t*>(buffer+pos);
-        }
-        close(fd);
-        delete[] buffer;
-        return total;
-
-    });
-
-    m.def("sum_pixel_direct", [](fs::path p){
-        pl::JungfrauRawFile f{p, 512,1024};
-        double total = 0;
-        for (size_t i=0; i!=100; ++i){
-            auto img = f.read_frame();
-            total += img(100,100);
-        }
-        return total;
-    });
+    
 
     py::class_<pl::File::iterator>(m, "FileIterator")
      .def(py::init<>())
@@ -160,6 +116,56 @@ PYBIND11_MODULE(_protolib, m) {
             return data;
             
         }, py::arg() = 0);
+
+
+    /////////////////////////////////////////////////
+    //Testing, playing around and random bits of code
+    /////////////////////////////////////////////////
+    m.def("test", []() {
+        auto image_ptr = new pl::ImageData<double>({15, 30});
+        return return_image_data(image_ptr);
+    });
+
+    m.def("test_data_path", &pl::test_data_path);
+
+    m.def("call_overhead", [](){return 5;});
+
+    m.def("sum_pixel", [](fs::path p){
+        pl::File f(p);
+        double total = 0;
+        for (auto& frame : f)
+            total += frame(100,100);
+        return total;
+    });
+
+    m.def("clean_read", [](fs::path p){
+        int fd;
+        fd = open(p.c_str(), O_RDONLY);
+        double total = 0;
+        constexpr size_t frame_size = 512*1024*2;
+        constexpr size_t header_size = 112;
+        constexpr size_t pos = (1024*100+100)*2;
+        std::byte* buffer = new std::byte[frame_size];
+        for(int i = 0; i!=100; ++i){
+            lseek (fd, header_size, SEEK_CUR);
+            read(fd, reinterpret_cast<char*>(buffer), frame_size);
+            total += *reinterpret_cast<uint16_t*>(buffer+pos);
+        }
+        close(fd);
+        delete[] buffer;
+        return total;
+
+    });
+
+    m.def("sum_pixel_direct", [](fs::path p){
+        pl::JungfrauRawFile f{p, 512,1024};
+        double total = 0;
+        for (size_t i=0; i!=100; ++i){
+            auto img = f.read_frame();
+            total += img(100,100);
+        }
+        return total;
+    });
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;
 #else
