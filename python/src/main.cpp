@@ -66,7 +66,7 @@ PYBIND11_MODULE(_protolib, m) {
         std::byte* buffer = new std::byte[frame_size];
         for(int i = 0; i!=100; ++i){
             lseek (fd, header_size, SEEK_CUR);
-            size_t bytes_read = read(fd, reinterpret_cast<char*>(buffer), frame_size);
+            read(fd, reinterpret_cast<char*>(buffer), frame_size);
             total += *reinterpret_cast<uint16_t*>(buffer+pos);
         }
         close(fd);
@@ -118,25 +118,25 @@ PYBIND11_MODULE(_protolib, m) {
                 n_frames = self.total_frames();
                 
             std::array<ssize_t, 3> shape{n_frames, self.shape()[0], self.shape()[1]};
-            if (self.bitdepth() == 8) {
+            const uint8_t item_size = self.bytes_per_pixel();
+            if (item_size == 1) {
                 image = py::array_t<uint8_t>(shape);
-            } else if (self.bitdepth() == 16) {
+            } else if (item_size == 2) {
                 image = py::array_t<uint16_t>(shape);
-            }else if (self.bitdepth() == 32) {
+            }else if (item_size == 4) {
                 image = py::array_t<uint32_t>(shape);
             }
             self.read_into(reinterpret_cast<std::byte *>(image.mutable_data()), n_frames);
             return image;
         }, py::arg() = 0)
         .def("read_frame", [](pl::File &self) {
-            fmt::print("Ping: {}x{}\n", self.shape()[0], self.shape()[1]);
-            fmt::print("Bitdepth: {}\n", self.bitdepth());
+            const uint8_t item_size = self.bytes_per_pixel();
             py::array image;
-            if (self.bitdepth() == 8) {
+            if (item_size == 1) {
                 image = py::array_t<uint8_t>(self.shape());
-            } else if (self.bitdepth() == 16) {
+            } else if (item_size == 2) {
                 image = py::array_t<uint16_t>(self.shape());
-            }else if (self.bitdepth() == 32) {
+            }else if (item_size == 4) {
                 image = py::array_t<uint32_t>(self.shape());
             }
             self.read_into(reinterpret_cast<std::byte *>(image.mutable_data()));

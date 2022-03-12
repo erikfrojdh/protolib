@@ -54,5 +54,33 @@ TEST_CASE("Move assign a frame"){
 
     //the moved from object will be in a "valid but unspecified" state
     //hence no tests for it
+}
 
+TEST_CASE("Accessing and assigning data using view"){
+    Frame img(7,3,32);
+    //copy in some data
+    std::vector<uint32_t> vec(7*3);
+    for (uint32_t i=0; i!=vec.size(); ++i)
+        vec[i] = i;
+    memcpy(img.data(), vec.data(), vec.size()*sizeof(decltype(vec)::value_type));
+
+    auto view = img.view<uint32_t>();
+    REQUIRE(view(0,0) == 0u);
+    REQUIRE(view(0,1) == 1u);
+    REQUIRE(view(6,2) == 20u);
+
+    view(6,2) = 15;
+    REQUIRE(view(6,2) == 15u);
+    REQUIRE(img(6,2) == 15.0);
+}
+
+TEST_CASE("Creating a mismatched view throws"){
+    Frame img(10,10, 16);
+    REQUIRE_THROWS(img.view<uint32_t>());
+}
+
+TEST_CASE("Constructing frame with unsuppored bitdepth throws"){
+    REQUIRE_THROWS(Frame(7,7,3));
+    REQUIRE_THROWS(Frame(7,7,9));
+    REQUIRE_THROWS(Frame(7,7,192));
 }

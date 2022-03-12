@@ -10,7 +10,7 @@ namespace pl {
 Provides a simple way to hold image data in memory.
 
 Open:
- * Can we assume integer values for pixels?
+ * Can we assume integer values for pixels or do we need to add float support?
 
 */
 class Frame {

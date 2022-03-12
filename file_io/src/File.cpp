@@ -24,7 +24,7 @@ size_t File::tell() const { return fp->tell(); }
 
 size_t File::frame_number(size_t fn) { return fp->frame_number(fn); }
 
-uint8_t File::bitdepth() { return meta.bitdepth; }
+uint8_t File::bits_per_pixel() const{ return meta.bitdepth; }
 
 Frame File::read_frame() {
     Frame frame(meta.rows, meta.cols, meta.bitdepth);
@@ -57,7 +57,7 @@ template ImageData<uint32_t, 2> File::read_as<uint32_t>();
 File::iterator File::begin() { return iterator(this); }
 File::iterator File::end() { return iterator(); }
 
-std::array<ssize_t, 2> File::shape() { return {meta.rows, meta.cols}; }
+image_shape File::shape() const { return {meta.rows, meta.cols}; }
 
 void File::read_into(std::byte *image_buf) { fp->read_into(image_buf); }
 

@@ -61,7 +61,7 @@ void sum_image_typed() {
     pl::File f(p);
     uint64_t total = 0;
     pl::ImageData<uint16_t> img(f.shape());
-    for (ssize_t i = 0; i != f.total_frames(); ++i) {
+    for (size_t i = 0; i != f.total_frames(); ++i) {
         f.read_into(img.buffer());
         total += std::accumulate(img.begin(), img.end(), 0u);
     }
@@ -72,7 +72,7 @@ void sum_image_direct() {
     pl::JungfrauRawFile f(direct_path, 512, 1024);
     uint64_t total = 0;
     pl::ImageData<uint16_t> img(f.shape());
-    for (ssize_t i = 0; i != f.n_frames(); ++i) {
+    for (size_t i = 0; i != f.n_frames(); ++i) {
         f.read_into(img.buffer());
         total += std::accumulate(img.begin(), img.end(), std::uint64_t{});
     }
@@ -103,18 +103,13 @@ void with_known_type(){
     fmt::print("{}\n", total);
 }
 
-void read_once(){
-    pl::File f(p);
-    for (auto&& img: f)
-        auto p = img(40,40);
-}
+
 
 int main() {
 
     const size_t N = 10;
 
     fmt::print("Running each test {} times\n", N);
-    // read_once();
     // timed("test", N, &test);
     // TIME(test);
     // TIME(sum_image);
