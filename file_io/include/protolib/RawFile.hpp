@@ -61,7 +61,7 @@ template <class Header, class DataType, class T> class RawFile : public crtp<T> 
     FilePtr fp;
     const ssize_t rows_{};
     const ssize_t cols_{};
-    const size_t n_frames_{};
+    const ssize_t n_frames_{};
   public:
 
     using value_type = DataType;
@@ -79,7 +79,10 @@ template <class Header, class DataType, class T> class RawFile : public crtp<T> 
     RawFile &operator=(RawFile &&) = default;
     ~RawFile() = default;
 
-    size_t n_frames() const { return n_frames_; }
+    ssize_t n_frames() const { return n_frames_; }
+    std::array<ssize_t, 2> shape() const{
+        return {rows_, cols_};
+    }
 
     void seek(size_t frame_number) {
         if (frame_number >= n_frames_)

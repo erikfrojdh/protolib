@@ -10,9 +10,9 @@
 
 namespace pl {
 
-
 class File;
 class Frame;
+
 namespace impl{
     struct FileIterator{
         using value_type = Frame;
@@ -32,12 +32,10 @@ namespace impl{
         FileIterator& operator++();
         bool operator==(const FileIterator& other);
         bool operator!=(const FileIterator& other);
-
     };
 }
 
 // Top level access, RAII, runtime polymorphism, as general as possible
-// Add seek? 
 // read 
 // minimize exposed area 
 // smooth operation over multiple files
@@ -47,34 +45,32 @@ class File {
     FileInfo meta;
 
   public:
-    File(std::filesystem::path fpath);
+    File(const std::filesystem::path& fpath);
     File(const File&) = delete;
     File(File&&) = default;
     File& operator=(const File&) = delete;
     File& operator=(File&&) = default;
     ~File() = default;
+
     size_t total_frames() const;
     void seek(size_t frame_number);
     size_t tell() const;
     size_t frame_number(size_t fn);
-    std::array<size_t, 2> shape();
+    std::array<ssize_t, 2> shape();
     uint8_t bitdepth();
-
+    uint8_t bytes_per_pixel() const;
+    size_t bytes_per_frame() const;
 
     //Reading
     Frame read_frame();
     void read_into(std::byte* image_buf);
     void read_into(std::byte* image_buf, size_t n_frames);
+    template<typename T>
+    ImageData<T> read_as();
     
-    
-    size_t bytes_per_frame() const;
     using iterator = impl::FileIterator;
-    iterator begin(){
-        return iterator(this);
-    }
-    iterator end(){
-        return iterator();
-    }
+    iterator begin();
+    iterator end();
 };
 
 

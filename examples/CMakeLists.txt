@@ -7,6 +7,7 @@ set(ExampleSrc
     e3_just_the_data.cpp
     e4_iterate_file.cpp
     e5_eiger.cpp
+    e6_benchmark.cpp
 )
 
 foreach(FILE ${ExampleSrc})

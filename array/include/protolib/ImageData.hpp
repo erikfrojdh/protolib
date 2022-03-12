@@ -25,7 +25,7 @@ template <typename T, ssize_t Ndim = 2> class ImageData {
     ImageData()
         : shape_(), strides_(c_strides<Ndim>(shape_)), size_(0),
           data_(nullptr){
-              fmt::print("ImageData()\n");
+            //   fmt::print("ImageData()\n");
           };
 
     explicit ImageData(std::array<ssize_t, Ndim> shape)

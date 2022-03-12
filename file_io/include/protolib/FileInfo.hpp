@@ -8,8 +8,8 @@ namespace pl{
 
 struct FileInfo {
     size_t total_frames{};
-    size_t rows{};
-    size_t cols{};
+    ssize_t rows{};
+    ssize_t cols{};
     uint8_t bitdepth{};
     DetectorType type{};
 

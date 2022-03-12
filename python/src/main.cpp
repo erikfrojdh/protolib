@@ -117,12 +117,12 @@ PYBIND11_MODULE(_protolib, m) {
             return return_frame(ptr);
         })
         .def("frame_number", &pl::File::frame_number)
-        .def("read", [](pl::File &self, size_t n_frames = 0){
+        .def("read", [](pl::File &self, ssize_t n_frames = 0){
             py::array image;
             if(n_frames == 0)
                 n_frames = self.total_frames();
                 
-            std::array<size_t, 3> shape{n_frames, self.shape()[0], self.shape()[1]};
+            std::array<ssize_t, 3> shape{n_frames, self.shape()[0], self.shape()[1]};
             if (self.bitdepth() == 8) {
                 image = py::array_t<uint8_t>(shape);
             } else if (self.bitdepth() == 16) {

@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 
 namespace pl {
 
-File::File(fs::path fpath) {
+File::File(const fs::path &fpath) {
     // Find file type at this time only raw files
     if (fpath.extension() == ".raw" && is_master_file(fpath)) {
         fp = std::make_unique<RawFileWrapper>(fpath);
@@ -32,7 +32,32 @@ Frame File::read_frame() {
     return frame;
 }
 
-std::array<size_t, 2> File::shape() { return {meta.rows, meta.cols}; }
+uint8_t File::bytes_per_pixel() const { return meta.bitdepth / 8; }
+
+template <typename T> ImageData<T> File::read_as() {
+    //Conversion could be both expensive and lossy
+    if (sizeof(T) != bytes_per_pixel()) {
+        auto msg = fmt::format("size of data type in file ({}) does not match "
+                               "size of requested type ({})",
+                               bytes_per_pixel(), sizeof(T));
+        throw std::runtime_error(msg);
+    }
+    
+    ImageData<T> img(shape());
+    read_into(img.buffer());
+    return img;
+}
+
+//Templates would otherwise be missing from library
+template ImageData<uint8_t, 2> File::read_as<uint8_t>();
+template ImageData<uint16_t, 2> File::read_as<uint16_t>();
+template ImageData<uint32_t, 2> File::read_as<uint32_t>();
+
+
+File::iterator File::begin() { return iterator(this); }
+File::iterator File::end() { return iterator(); }
+
+std::array<ssize_t, 2> File::shape() { return {meta.rows, meta.cols}; }
 
 void File::read_into(std::byte *image_buf) { fp->read_into(image_buf); }
 
