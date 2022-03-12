@@ -4,9 +4,7 @@ Kind of stupid example but gives a feeling for the performance
 and ways to interact with the library
 */
 
-#include "protolib/File.hpp"
-#include "protolib/ImageData.hpp"
-#include "protolib/RawFile.hpp"
+#include "protolib/protolib.hpp"
 #include <chrono>
 #include <cstdint>
 #include <filesystem>

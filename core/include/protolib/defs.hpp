@@ -1,7 +1,10 @@
 #pragma once
 #include <string_view>
 #include <fmt/format.h>
+#include <array>
 namespace pl {
+
+using image_shape = std::array<ssize_t, 2>;
 
 typedef struct {
     uint64_t frameNumber;

@@ -1,7 +1,5 @@
 
-#include "protolib/ImageData.hpp"
-#include "protolib/RawFile.hpp"
-#include "protolib/File.hpp"
+#include "protolib/protolib.hpp"
 
 #include <filesystem>
 

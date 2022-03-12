@@ -1,7 +1,7 @@
 #include <fmt/format.h>
 #include <filesystem>
 
-#include "protolib/File.hpp"
+#include "protolib/protolib.hpp"
 
 int main() { 
     //For convenience

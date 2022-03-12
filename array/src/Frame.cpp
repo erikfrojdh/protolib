@@ -21,9 +21,14 @@ double Frame::operator()(size_t row, size_t col) {
     }
     return 3.14;
 }
-ssize_t Frame::rows() { return nrows; }
-ssize_t Frame::cols() { return ncols; }
-uint8_t Frame::bitdepth() { return bitdepth_; }
+ssize_t Frame::rows() const { return nrows; }
+ssize_t Frame::cols() const { return ncols; }
+uint8_t Frame::bitdepth() const { return bitdepth_; }
+uint8_t Frame::bytes_per_pixel() const {return bitdepth_/8;}
+
+image_shape Frame::shape() const{
+    return {nrows, ncols};
+}
 
 std::byte *Frame::data() { return data_.get(); }
 

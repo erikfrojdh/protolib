@@ -2,6 +2,7 @@
 
 #include "protolib/ImageData.hpp"
 #include "protolib/DataSpan.hpp"
+#include "protolib/defs.hpp"
 #include <fmt/format.h>
 
 namespace pl
@@ -30,9 +31,11 @@ public:
     Frame(Frame&&) = default;
     
     double operator()(size_t row, size_t col);
-    ssize_t rows();
-    ssize_t cols();
-    uint8_t bitdepth();
+    ssize_t rows() const;
+    ssize_t cols() const;
+    uint8_t bitdepth() const;
+    uint8_t bytes_per_pixel() const;
+    image_shape shape() const;
     std::byte* data();
 
     template<typename T>
@@ -40,9 +43,3 @@ public:
 };
 
 } // namespace pl
-
-// RawFile(const RawFile &) = default;
-//     RawFile &operator=(const RawFile &) = default;
-//     RawFile(RawFile &&) = default;
-//     RawFile &operator=(RawFile &&) = default;
-//     ~RawFile() = default;
