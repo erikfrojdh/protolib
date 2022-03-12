@@ -7,3 +7,9 @@
 
 target_sources(protolib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/Frame.cpp )
 target_include_directories(protolib PUBLIC include)
+
+if(USE_TESTS)
+    target_sources(tests PRIVATE 
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Frame.test.cpp
+    )
+endif()

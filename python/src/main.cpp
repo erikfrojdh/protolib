@@ -14,17 +14,12 @@
 #include "np_helper.hpp"
 
 // #include "typecaster.h"
-#include "protolib/File.hpp"
-#include "protolib/RawFile.hpp"
-#include "protolib/Frame.hpp"
+#include "protolib/protolib.hpp"
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <err.h>
-#include <fcntl.h>
-#include <sysexits.h>
-#include <unistd.h>
+
+#include <fcntl.h> // for the clean_read example
+
 
 using pl::File;
 using pl::Frame;

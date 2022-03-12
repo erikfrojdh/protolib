@@ -93,7 +93,10 @@ FileIterator::reference FileIterator::operator*() { return frame; }
 } // namespace impl
 
 std::filesystem::path test_data_path() {
-    return fs::path(std::getenv("PL_TEST_DATA"));
+    const char* env_p = std::getenv("PL_TEST_DATA");
+    if(!env_p)
+        throw std::runtime_error("Test data path not set. Export PL_TEST_DATA to run tests!");
+    return fs::path(env_p);
 }
 
 } // namespace pl

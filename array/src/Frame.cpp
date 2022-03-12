@@ -6,7 +6,7 @@ Frame::Frame(size_t nr, size_t nc, uint8_t dr)
     : nrows(nr), ncols(nc), bitdepth_(dr) {
     data_ = std::make_unique<std::byte[]>(nrows * ncols * bitdepth_ / 8);
 }
-double Frame::operator()(size_t row, size_t col) {
+double Frame::operator()(size_t row, size_t col) const {
     const size_t i = (row * ncols + col) * (bitdepth_ / 8);
     if (bitdepth_ == 8){
         return static_cast<double>(
@@ -23,8 +23,9 @@ double Frame::operator()(size_t row, size_t col) {
 }
 ssize_t Frame::rows() const { return nrows; }
 ssize_t Frame::cols() const { return ncols; }
-uint8_t Frame::bitdepth() const { return bitdepth_; }
+uint8_t Frame::bits_per_pixel() const { return bitdepth_; }
 uint8_t Frame::bytes_per_pixel() const {return bitdepth_/8;}
+size_t Frame::total_bytes() const {return nrows*ncols*bytes_per_pixel();}
 
 image_shape Frame::shape() const{
     return {nrows, ncols};
