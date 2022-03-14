@@ -2,6 +2,8 @@
 #include <string_view>
 #include <fmt/format.h>
 #include <array>
+#include <filesystem>
+
 namespace pl {
 
 using image_shape = std::array<ssize_t, 2>;
@@ -36,5 +38,5 @@ template <> DetectorType StringTo(std::string_view name);
 
 template <>TimingMode StringTo(std::string_view mode);
 
-
+std::filesystem::path test_data_path();
 } // namespace pl
