@@ -11,6 +11,9 @@ and ways to interact with the library
 #include <fmt/core.h>
 #include <string>
 #include <thread>
+
+#include <cstdio> // for reference implementation
+
 using std::chrono::duration;
 using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
@@ -86,12 +89,14 @@ struct make_sum {
     }
 };
 
-void using_algorithms() {
-    pl::File f(p);
-    auto total =
-        std::transform_reduce(f.begin(), f.end(), 0ul, std::plus{}, make_sum{});
-    fmt::print("{}\n", total);
-}
+// Wold need Frame to be copyable to fully satisfy input_iterator
+// might add back later
+// void using_algorithms() {
+//     pl::File f(p);
+//     auto total =
+//         std::transform_reduce(f.begin(), f.end(), 0ul, std::plus{}, make_sum{});
+//     fmt::print("{}\n", total);
+// }
 
 void with_known_type(){
     pl::File f(p);
@@ -103,6 +108,28 @@ void with_known_type(){
     fmt::print("{}\n", total);
 }
 
+//reference implementation to compare against
+//depending on machine load times dominate
+void reference_implementation(){
+    constexpr size_t pixels_per_frame = 512*1024;
+    constexpr size_t bytes_per_frame = 512*1024*sizeof(uint16_t);
+    constexpr size_t header_size = 112;
+    uint16_t* data = new uint16_t[pixels_per_frame];
+    uint64_t total = 0;
+
+    FILE* fp = fopen(direct_path.c_str(), "r");
+    for(int i = 0; i!=1000; ++i){
+        fseek(fp, header_size, SEEK_CUR);
+        fread(data, bytes_per_frame, 1, fp);
+        uint32_t frame_total=0; //can overflow for all max!
+        for (size_t j = 0; j!=pixels_per_frame; ++j)
+            frame_total += data[j];
+        total += frame_total;
+    }
+    delete[] data;
+    fclose(fp);
+    fmt::print("{}\n", total);
+}
 
 
 int main() {
@@ -118,4 +145,5 @@ int main() {
     // TIME(sum_view);
     // TIME(using_algorithms);
     TIME(with_known_type);
+    TIME(reference_implementation);
 }

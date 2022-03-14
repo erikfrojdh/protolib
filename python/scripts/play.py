@@ -1,6 +1,6 @@
 
-import _protolib as pl
-from _protolib import File
+
+import protolib as pl
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,8 +11,13 @@ plt.ion()
 fpath =  pl.test_data_path()/"eiger/sample_master_2.raw"
 
 
-f = File(fpath)
-image = f.read_frame()
+# f = pl.File(fpath)
+# image = f.read_frame()
+
+c = pl.RawFileConfig()
+c.module_gap_row = 32
+f = pl.RawMasterFile(fpath, c)
+image = f.read(1)[0]
 plt.figure()
 plt.imshow(image)
 plt.clim(0,2e5)

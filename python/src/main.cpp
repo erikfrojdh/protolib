@@ -16,10 +16,7 @@
 // #include "typecaster.h"
 #include "protolib/protolib.hpp"
 
-
-
 #include <fcntl.h> // for the clean_read example
-
 
 using pl::File;
 using pl::Frame;
@@ -39,52 +36,59 @@ PYBIND11_MODULE(_protolib, m) {
 
     )pbdoc";
 
-    
-
     py::class_<pl::File::iterator>(m, "FileIterator")
-     .def(py::init<>())
-     .def("__next__", [](File::iterator &self){
-         if (self==File::iterator{})
-            throw py::stop_iteration();
-         Frame* ptr = new Frame;
-         *ptr = std::move(*self);
-         ++self;
-         return return_frame(ptr);
-     });
+        .def(py::init<>())
+        .def("__next__", [](File::iterator &self) {
+            if (self == File::iterator{})
+                throw py::stop_iteration();
+            Frame *ptr = new Frame;
+            *ptr = std::move(*self);
+            ++self;
+            return return_frame(ptr);
+        });
 
     py::class_<pl::File>(m, "File")
         .def(py::init<std::filesystem::path>())
         .def("total_frames", &pl::File::total_frames)
         .def("tell", &pl::File::tell)
         .def("seek", &pl::File::seek)
-        .def("__enter__", [](pl::File &self){return &self;} )
-        .def("__exit__", [](pl::File &self, const py::object &, const py::object &, const py::object &){
-            //close the file? 
-        } )
-        .def("__iter__", [](pl::File &self){return self.begin();})
-        .def("test_read", [](pl::File &self){
-            pl::Frame* ptr = new pl::Frame;
-            *ptr = self.read_frame();
-            return return_frame(ptr);
-        })
+        .def("__enter__", [](pl::File &self) { return &self; })
+        .def("__exit__",
+             [](pl::File &self, const py::object &, const py::object &,
+                const py::object &) {
+                 // close the file is done on destruction
+             })
+        .def("__iter__", [](pl::File &self) { return self.begin(); })
+        .def("test_read",
+             [](pl::File &self) {
+                 pl::Frame *ptr = new pl::Frame;
+                 *ptr = self.read_frame();
+                 return return_frame(ptr);
+             })
         .def("frame_number", &pl::File::frame_number)
-        .def("read", [](pl::File &self, ssize_t n_frames = 0){
-            py::array image;
-            if(n_frames == 0)
-                n_frames = self.total_frames();
-                
-            std::array<ssize_t, 3> shape{n_frames, self.shape()[0], self.shape()[1]};
-            const uint8_t item_size = self.bytes_per_pixel();
-            if (item_size == 1) {
-                image = py::array_t<uint8_t>(shape);
-            } else if (item_size == 2) {
-                image = py::array_t<uint16_t>(shape);
-            }else if (item_size == 4) {
-                image = py::array_t<uint32_t>(shape);
-            }
-            self.read_into(reinterpret_cast<std::byte *>(image.mutable_data()), n_frames);
-            return image;
-        }, py::arg() = 0)
+        .def(
+            "read",
+            [](pl::File &self, ssize_t n_frames = 0) {
+                py::array image;
+                if (n_frames == 0)
+                    n_frames = self.total_frames();
+
+                std::array<ssize_t, 3> shape{n_frames, self.shape()[0],
+                                             self.shape()[1]};
+                const uint8_t item_size = self.bytes_per_pixel();
+                if (item_size == 1) {
+                    image = py::array_t<uint8_t>(shape);
+                } else if (item_size == 2) {
+                    image = py::array_t<uint16_t>(shape);
+                } else if (item_size == 4) {
+                    image = py::array_t<uint32_t>(shape);
+                }
+                self.read_into(
+                    reinterpret_cast<std::byte *>(image.mutable_data()),
+                    n_frames);
+                return image;
+            },
+            py::arg() = 0)
         .def("read_frame", [](pl::File &self) {
             const uint8_t item_size = self.bytes_per_pixel();
             py::array image;
@@ -92,7 +96,7 @@ PYBIND11_MODULE(_protolib, m) {
                 image = py::array_t<uint8_t>(self.shape());
             } else if (item_size == 2) {
                 image = py::array_t<uint16_t>(self.shape());
-            }else if (item_size == 4) {
+            } else if (item_size == 4) {
                 image = py::array_t<uint32_t>(self.shape());
             }
             self.read_into(reinterpret_cast<std::byte *>(image.mutable_data()));
@@ -103,23 +107,37 @@ PYBIND11_MODULE(_protolib, m) {
         .def(py::init<size_t, size_t, uint8_t>())
         .def("__call__", &pl::Frame::operator());
 
+    py::class_<pl::RawMasterFile>(m, "RawMasterFile")
+    .def(py::init<fs::path>())
+    .def(py::init<fs::path, pl::RawFileConfig>())
+    .def("read", &do_read<pl::RawMasterFile>);
+
+    py::class_<pl::RawFileConfig>(m, "RawFileConfig")
+        .def(py::init<>())
+        .def_readwrite("module_gap_row", &pl::RawFileConfig::module_gap_row)
+        .def_readwrite("module_gap_col", &pl::RawFileConfig::module_gap_col);
+
     py::class_<pl::JungfrauRawFile>(m, "JungfrauRawFile")
         .def(py::init<fs::path, size_t, size_t>())
-        .def("read", [](pl::JungfrauRawFile& self, ssize_t n_frames = 0){
-            py::array image;
-            if(n_frames == 0)
-                n_frames = self.n_frames();
-            std::array<ssize_t, 3> shape{n_frames, self.rows(), self.cols()};
+        .def(
+            "read",
+            [](pl::JungfrauRawFile &self, ssize_t n_frames = 0) {
+                py::array image;
+                if (n_frames == 0)
+                    n_frames = self.n_frames();
+                std::array<ssize_t, 3> shape{n_frames, self.rows(),
+                                             self.cols()};
 
-            py::array_t<uint16_t> data(shape);
-            self.read_into(reinterpret_cast<std::byte *>(data.mutable_data()), n_frames);
-            return data;
-            
-        }, py::arg() = 0);
-
+                py::array_t<uint16_t> data(shape);
+                self.read_into(
+                    reinterpret_cast<std::byte *>(data.mutable_data()),
+                    n_frames);
+                return data;
+            },
+            py::arg() = 0);
 
     /////////////////////////////////////////////////
-    //Testing, playing around and random bits of code
+    // Testing, playing around and random bits of code
     /////////////////////////////////////////////////
     m.def("test", []() {
         auto image_ptr = new pl::ImageData<double>({15, 30});
@@ -128,41 +146,40 @@ PYBIND11_MODULE(_protolib, m) {
 
     m.def("test_data_path", &pl::test_data_path);
 
-    m.def("call_overhead", [](){return 5;});
+    m.def("call_overhead", []() { return 5; });
 
-    m.def("sum_pixel", [](fs::path p){
+    m.def("sum_pixel", [](fs::path p) {
         pl::File f(p);
         double total = 0;
-        for (auto& frame : f)
-            total += frame(100,100);
+        for (auto &frame : f)
+            total += frame(100, 100);
         return total;
     });
 
-    m.def("clean_read", [](fs::path p){
+    m.def("clean_read", [](fs::path p) {
         int fd;
         fd = open(p.c_str(), O_RDONLY);
         double total = 0;
-        constexpr size_t frame_size = 512*1024*2;
+        constexpr size_t frame_size = 512 * 1024 * 2;
         constexpr size_t header_size = 112;
-        constexpr size_t pos = (1024*100+100)*2;
-        std::byte* buffer = new std::byte[frame_size];
-        for(int i = 0; i!=100; ++i){
-            lseek (fd, header_size, SEEK_CUR);
-            read(fd, reinterpret_cast<char*>(buffer), frame_size);
-            total += *reinterpret_cast<uint16_t*>(buffer+pos);
+        constexpr size_t pos = (1024 * 100 + 100) * 2;
+        std::byte *buffer = new std::byte[frame_size];
+        for (int i = 0; i != 100; ++i) {
+            lseek(fd, header_size, SEEK_CUR);
+            read(fd, reinterpret_cast<char *>(buffer), frame_size);
+            total += *reinterpret_cast<uint16_t *>(buffer + pos);
         }
         close(fd);
         delete[] buffer;
         return total;
-
     });
 
-    m.def("sum_pixel_direct", [](fs::path p){
-        pl::JungfrauRawFile f{p, 512,1024};
+    m.def("sum_pixel_direct", [](fs::path p) {
+        pl::JungfrauRawFile f{p, 512, 1024};
         double total = 0;
-        for (size_t i=0; i!=100; ++i){
+        for (size_t i = 0; i != 100; ++i) {
             auto img = f.read_frame();
-            total += img(100,100);
+            total += img(100, 100);
         }
         return total;
     });
