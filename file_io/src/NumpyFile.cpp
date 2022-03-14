@@ -13,5 +13,8 @@ dynamic_shape NumpyFile::shape() const{
     return header_.shape();
 }
 
+DataType NumpyFile::dtype() const{
+    return DataType(typeid(int));
+}
 
 }

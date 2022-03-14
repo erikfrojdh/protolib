@@ -31,6 +31,7 @@ class NumpyArrDescr {
     dynamic_shape shape() const { return shape_; }
     std::string descr() const { return descr_; }
     bool fortran_order() const noexcept { return fortran_order_; }
+    DataType dtype() const;
     std::string str() const {
         return fmt::format(
             "{{'descr': '{}', 'fortran_order': {}, 'shape': {}, }}", descr_,

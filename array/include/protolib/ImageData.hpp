@@ -24,22 +24,17 @@ template <typename T, ssize_t Ndim = 2> class ImageData {
   public:
     ImageData()
         : shape_(), strides_(c_strides<Ndim>(shape_)), size_(0),
-          data_(nullptr){
-            //   fmt::print("ImageData()\n");
-          };
+          data_(nullptr){};
 
     explicit ImageData(std::array<ssize_t, Ndim> shape)
         : shape_(shape), strides_(c_strides<Ndim>(shape_)),
           size_(std::accumulate(shape_.begin(), shape_.end(), 1,
                                 std::multiplies<ssize_t>())),
-          data_(new T[size_]){
-            //   fmt::print("ImageData(std::array<ssize_t, Ndim> shape)\n");
-          };
+          data_(new T[size_]){};
 
     ImageData(std::array<ssize_t, Ndim> shape, T value) : ImageData(shape) {
         this->operator=(value);
-        // fmt::print("ImageData(std::array<ssize_t, Ndim> shape, T value)\n");
-    };
+    }
 
     /* When constructing from a DataSpan we need to copy the data since
     ImageData expect to own its data, and span is just a view*/

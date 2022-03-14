@@ -28,11 +28,19 @@ NumpyArrDescr::NumpyArrDescr(DataType dt, std::vector<ssize_t> shape){
     descr_ = dt.str();
     shape_ = shape;
 }
+DataType NumpyArrDescr::dtype() const{
+    return DataType{typeid(int)};
+}
+
+
+
+
 
 
 NumpyFileHeader::NumpyFileHeader(DataType dt, std::vector<ssize_t> sh)
         : major_ver_(1), minor_ver_(0), descr(dt, sh){
 
         }
+
 
 }
