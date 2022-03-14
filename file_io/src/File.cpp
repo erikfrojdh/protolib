@@ -8,6 +8,13 @@ namespace fs = std::filesystem;
 namespace pl {
 
 File::File(const fs::path &fpath) {
+
+    if(!fs::exists(fpath)){
+        auto msg = fmt::format("Could not find: {}", fpath.c_str());
+        throw std::runtime_error(msg);
+    }
+        
+
     // Find file type at this time only raw files
     if (fpath.extension() == ".raw" && is_master_file(fpath)) {
         fp = std::make_unique<RawFileWrapper>(fpath);

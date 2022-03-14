@@ -2,11 +2,13 @@
 #include <string_view>
 #include <fmt/format.h>
 #include <array>
+#include <vector>
 #include <filesystem>
 
 namespace pl {
 
 using image_shape = std::array<ssize_t, 2>;
+using dynamic_shape = std::vector<ssize_t>;
 
 typedef struct {
     uint64_t frameNumber;

@@ -14,8 +14,9 @@ Support library for analyzing data from PSI pixel and strip detectors
 
 ### Dependencies
 
+* libfmt
+* pybind11 > 2.7.0
 * C++17? (module load gcc on RH7)
-* Maybe but probably not: https://xtensor.readthedocs.io/en/latest/index.html
 * Optional HDF5 (for our files)
 
 

@@ -26,6 +26,7 @@ endforeach()
 set(PythonExamples
     pyex1_read_file.py 
     pyex2_jungfrau_file.py
+    pyex3_imshow.py 
     pyex4_iterate_file.py 
     pyex5_iterate_benchmark.py
 )
