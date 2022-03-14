@@ -1,30 +1,37 @@
 #pragma once
 
-#include "protolib/NumpyFileHeader.hpp"
 #include "protolib/ImageData.hpp"
+#include "protolib/NumpyFileHeader.hpp"
 #include "protolib/defs.hpp"
 #include <filesystem>
+#include <fstream>
 
-namespace pl{
-class NumpyFile{
+namespace pl {
+class NumpyFile {
     NumpyFileHeader header_;
-    public:
-        NumpyFile();
-        NumpyFile(const std::filesystem::path& fpath );
-        dynamic_shape shape() const;
-        DataType dtype() const;
+    std::ifstream ifs_;
 
-        template<typename T, ssize_t Ndim>
-        ImageData<T, Ndim> read_as(){
-            auto vec = shape();
-            if (vec.size() != Ndim)
-                throw std::runtime_error("pof");
-            std::array<ssize_t, Ndim> shape{};
-            std::copy(vec.begin(), vec.end(), shape.begin());
-            ImageData<T, Ndim> data{shape};
-            return data;
-        };
+  public:
+    NumpyFile();
+    NumpyFile(const std::filesystem::path &fpath);
+    dynamic_shape shape() const;
+    DataType dtype() const;
+
+    template <typename T, ssize_t Ndim> ImageData<T, Ndim> read_as() {
+        auto vec = shape();
+        if (vec.size() != Ndim)
+            throw std::runtime_error("pof");
+
+        //check that the type matches!
+        
+        auto shape = make_array<Ndim>(vec);
+
+        ImageData<T, Ndim> data{shape};
+        ifs_.read(reinterpret_cast<char *>(data.buffer()),
+                  data.size() *
+                      sizeof(typename ImageData<T, Ndim>::value_type));
+        return data;
+    };
 };
 
-}
-
+} // namespace pl

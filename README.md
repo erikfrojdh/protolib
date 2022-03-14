@@ -19,6 +19,11 @@ Support library for analyzing data from PSI pixel and strip detectors
 * C++17? (module load gcc on RH7)
 * Optional HDF5 (for our files)
 
+### Work in progress
+
+* algorithms that operate on files and in memory
+* write numpy files
+
 
 # Examples:
 

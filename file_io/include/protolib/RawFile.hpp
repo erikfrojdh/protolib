@@ -1,6 +1,7 @@
 #pragma once
 #include "protolib/FileInfo.hpp"
 #include "protolib/ImageData.hpp"
+#include "protolib/FilePtr.hpp"
 
 #include <cassert>
 #include <cstdio>
@@ -25,36 +26,6 @@ struct crtp
 };
 
 
-class FilePtr{
-    FILE* fp_{nullptr};
-    public:
-        FilePtr() = default;
-        FilePtr(const fs::path& fname){
-            fp_ = fopen(fname.c_str(), "r");
-            if(!fp_)
-                throw std::runtime_error(fmt::format("Could not open: {}", fname.c_str()));
-        }
-        FilePtr(const FilePtr&) = delete;               //we don't want a copy
-        FilePtr& operator=(const FilePtr&) = delete;    //since we handle a resource
-        
-        FilePtr(FilePtr&& other){
-            std::swap(fp_, other.fp_);
-        }
-        
-        FilePtr& operator=(FilePtr&& other){
-            std::swap(fp_, other.fp_);
-            return *this;
-        }
-
-        FILE* get(){
-            return fp_;
-        }
-        ~FilePtr(){
-            if(fp_)
-                fclose(fp_); //check?
-        }
-};
-
 template <class Header, class DataType, class T> class RawFile : public crtp<T> {
 
  protected:
@@ -67,7 +38,7 @@ template <class Header, class DataType, class T> class RawFile : public crtp<T> 
     using value_type = DataType;
 
     RawFile(fs::path fname, ssize_t rows, ssize_t cols)
-        : fp(fname), rows_(rows), cols_(cols),
+        : fp(fname.c_str()), rows_(rows), cols_(cols),
           n_frames_(fs::file_size(fname) /
                     (sizeof(Header) + sizeof(DataType) * rows_ * cols_)) {
 

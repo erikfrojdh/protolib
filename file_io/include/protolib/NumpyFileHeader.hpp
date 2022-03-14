@@ -50,8 +50,6 @@ class NumpyFileHeader {
     uint8_t major_ver() const noexcept { return major_ver_; }
     uint8_t minor_ver() const noexcept { return minor_ver_; }
 
-    
-
     dynamic_shape shape() const { return descr.shape(); }
     size_t ndim() const noexcept { return descr.shape().size(); }
     std::string dtype() const { return descr.descr(); }

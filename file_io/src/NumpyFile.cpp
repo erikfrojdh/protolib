@@ -5,8 +5,10 @@ namespace fs = std::filesystem;
 namespace pl{
 
 NumpyFile::NumpyFile(){};
-NumpyFile::NumpyFile(const fs::path& fpaht){
-    header_ = NumpyFileHeader::fromFile(fpaht);
+NumpyFile::NumpyFile(const fs::path& fpaht)
+:ifs_(fpaht)
+{
+    header_ = NumpyFileHeader::fromFile(ifs_);
 }
 
 dynamic_shape NumpyFile::shape() const{
