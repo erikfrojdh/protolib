@@ -22,6 +22,8 @@ DataType::DataType(const std::type_info &t) {
             "Could not construct data type. Type not supported.");
 }
 
+DataType::DataType(DataType::TypeIndex ti):type_(ti){}
+
 DataType::DataType(std::string_view sv) {
 
     // Check if the file is using our native endianess
@@ -90,8 +92,8 @@ bool DataType::operator!=(const std::type_info &t) const {
     return DataType(t) != *this;
 }
 
-bool DataType::operator==(DataType::TypeIndex ti) const { return type_ == ti; }
+// bool DataType::operator==(DataType::TypeIndex ti) const { return type_ == ti; }
 
-bool DataType::operator!=(DataType::TypeIndex ti) const { return type_ != ti; }
+// bool DataType::operator!=(DataType::TypeIndex ti) const { return type_ != ti; }
 
 } // namespace pl

@@ -26,7 +26,16 @@ TEST_CASE("Parse 1d string") {
     REQUIRE(r.descr() == "<i4");
     REQUIRE(r.fortran_order() == false);
     REQUIRE(r.shape() == dynamic_shape{10});
-
+    
+    //we get the same string back 
     REQUIRE(r.str() == s);
 }
 
+TEST_CASE("build string to write to"){
+    NumpyFileHeader h(DataType::INT32, {19,32});
+    REQUIRE(h.shape() == dynamic_shape{19,32});
+
+    auto s =  h.str();
+    REQUIRE((s.size() % 64) == 0);
+
+}

@@ -6,6 +6,18 @@
 #include <filesystem>
 #include <fstream>
 
+/*
+https://numpy.org/devdocs/reference/generated/numpy.lib.format.html
+
+6 bytes magic string: \x93NUMPY
+1 byte major ver
+1 byte minor ver
+2 bytes little endian uint16_t HEADER_LEN (divisible with 64)
+len(magic string) + 2 + len(length) + HEADER_LEN padded with space \x20
+*/
+
+
+
 namespace pl {
 class NumpyFile {
     NumpyFileHeader header_;
@@ -23,7 +35,7 @@ class NumpyFile {
             throw std::runtime_error("pof");
 
         //check that the type matches!
-        
+
         auto shape = make_array<Ndim>(vec);
 
         ImageData<T, Ndim> data{shape};

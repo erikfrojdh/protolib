@@ -27,13 +27,15 @@ class DataType {
 
     explicit DataType(const std::type_info &t);
     explicit DataType(std::string_view sv);
+    //not explicit to allow conversions form enum to DataType
+    DataType(DataType::TypeIndex ti); 
 
     bool operator==(const DataType &other) const noexcept;
     bool operator!=(const DataType &other) const noexcept;
     bool operator==(const std::type_info &t) const;
     bool operator!=(const std::type_info &t) const;
-    bool operator==(DataType::TypeIndex ti) const;
-    bool operator!=(DataType::TypeIndex ti) const;
+    // bool operator==(DataType::TypeIndex ti) const;
+    // bool operator!=(DataType::TypeIndex ti) const;
     std::string str() const;
 
   

@@ -239,6 +239,22 @@ void RawMasterFile::open_subfiles() {
                 subfiles.push_back(EigerTop<uint32_t>(
                     data_fname(i, 0), subfile_rows_, subfile_cols_));
 
+        }else if (type_ == DetectorType::Eiger && bitdepth_ == 16) {
+            if (positions[i].row % 2)
+                subfiles.push_back(EigerBot<uint16_t>(
+                    data_fname(i, 0), subfile_rows_, subfile_cols_));
+            else
+                subfiles.push_back(EigerTop<uint16_t>(
+                    data_fname(i, 0), subfile_rows_, subfile_cols_));
+
+        }else if (type_ == DetectorType::Eiger && bitdepth_ == 8) {
+            if (positions[i].row % 2)
+                subfiles.push_back(EigerBot<uint8_t>(
+                    data_fname(i, 0), subfile_rows_, subfile_cols_));
+            else
+                subfiles.push_back(EigerTop<uint8_t>(
+                    data_fname(i, 0), subfile_rows_, subfile_cols_));
+
         }
 
         else if (type_ == DetectorType::Jungfrau)

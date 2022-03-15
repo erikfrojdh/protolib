@@ -32,11 +32,8 @@ class NumpyArrDescr {
     std::string descr() const { return descr_; }
     bool fortran_order() const noexcept { return fortran_order_; }
     DataType dtype() const;
-    std::string str() const {
-        return fmt::format(
-            "{{'descr': '{}', 'fortran_order': {}, 'shape': {}, }}", descr_,
-            (fortran_order_) ? "True" : "False", vec2str(shape_));
-    }
+    std::string str() const;
+
 };
 
 class NumpyFileHeader {
@@ -55,7 +52,10 @@ class NumpyFileHeader {
     std::string dtype() const { return descr.descr(); }
     bool fortran_order() const noexcept { return descr.fortran_order(); }
     NumpyFileHeader() = default;
+    
     NumpyFileHeader(DataType dt, dynamic_shape sh);
+    // NumpyFileHeader(DataType::TypeIndex ti, dynamic_shape sh);
+    std::string str() const;
 
     static NumpyFileHeader fromFile(std::ifstream &f) {
         std::array<char, 6> tmp{};
