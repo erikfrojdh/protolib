@@ -21,7 +21,7 @@ enum class endian
 class DataType {
     static_assert(sizeof(long)==sizeof(int64_t), "long should be 64bits");
   public:
-    enum  TypeIndex { INT32, UINT32, INT64, UINT64, FLOAT, DOUBLE, ERROR };
+    enum  TypeIndex { INT8, UINT8, INT16, UINT16, INT32, UINT32, INT64, UINT64, FLOAT, DOUBLE, ERROR };
     
 
 

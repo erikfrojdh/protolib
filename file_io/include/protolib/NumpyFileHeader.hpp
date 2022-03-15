@@ -54,7 +54,7 @@ class NumpyFileHeader {
     NumpyFileHeader() = default;
     
     NumpyFileHeader(DataType dt, dynamic_shape sh);
-    // NumpyFileHeader(DataType::TypeIndex ti, dynamic_shape sh);
+
     std::string str() const;
 
     static NumpyFileHeader fromFile(std::ifstream &f) {

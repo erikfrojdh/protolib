@@ -12,6 +12,9 @@ set_target_properties(_protolib PROPERTIES
 configure_file( scripts/play.py  
     ${CMAKE_BINARY_DIR}/play.py 
 )
+configure_file( scripts/numpy_inspect.py  
+    ${CMAKE_BINARY_DIR}/numpy_inspect.py 
+)
 
 
 set(PythonFiles

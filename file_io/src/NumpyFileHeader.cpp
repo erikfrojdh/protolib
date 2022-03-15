@@ -44,14 +44,28 @@ NumpyFileHeader::NumpyFileHeader(DataType dt, std::vector<ssize_t> sh)
 // string representation of the header, as it will be written to file
 std::string NumpyFileHeader::str() const {
     auto description = descr.str();
-    size_t header_length = magic_str.size() + sizeof(major_ver_) +
-                           sizeof(minor_ver_) + sizeof(uint16_t) + description.size();
+    uint16_t static_header_length = magic_str.size() + sizeof(major_ver_) +
+                           sizeof(minor_ver_) + sizeof(uint16_t);
+    uint16_t header_length = static_header_length + description.size();
     
-    fmt::print("header_length: {}\n", header_length);
+    //align to 64
     header_length += 64 - (header_length % 64);
-    fmt::print("header_length: {}\n", header_length);
     std::string header(header_length, '\x20');
-    fmt::print("header.size(): {}\n", header.size());
+
+    //adjust so that header_length reflect the bytes that can be read
+    header_length -= static_header_length;
+
+    char* dst = &header[0];
+    memcpy(dst, &magic_str[0], sizeof(magic_str));
+    dst += sizeof(magic_str);
+    memcpy(dst, &major_ver_, sizeof(major_ver_));
+    dst += sizeof(major_ver_);
+    memcpy(dst, &minor_ver_, sizeof(minor_ver_));
+    dst += sizeof(minor_ver_);
+    memcpy(dst, &header_length, sizeof(header_length));
+    dst += sizeof(header_length);
+    memcpy(dst, &description[0], description.size());
+
     return header;
 }
 

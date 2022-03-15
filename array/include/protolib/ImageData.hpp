@@ -143,6 +143,7 @@ template <typename T, ssize_t Ndim = 2> class ImageData {
     T *data() { return data_; }
     std::byte *buffer() { return reinterpret_cast<std::byte *>(data_); }
     ssize_t size() const { return size_; }
+    size_t total_bytes() const {return size_*sizeof(T);}
     std::array<ssize_t, Ndim> shape() const noexcept { return shape_; }
     ssize_t shape(ssize_t i) const noexcept { return shape_[i]; }
     std::array<ssize_t, Ndim> strides() const noexcept { return strides_; }

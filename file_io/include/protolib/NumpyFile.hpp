@@ -44,6 +44,25 @@ class NumpyFile {
                       sizeof(typename ImageData<T, Ndim>::value_type));
         return data;
     };
+
+    void close();
+
+    template <typename T>
+    static void save(std::filesystem::path fpath,  T& data){
+
+        auto s = data.shape();
+        dynamic_shape shape(s.begin(), s.end());
+
+        DataType dt(typeid(typename T::value_type));
+        NumpyFileHeader h(dt, shape);
+        auto header_str = h.str();
+        // header_str.back() = '\x0a';
+
+        std::ofstream ofs(fpath);
+        ofs.write(&header_str[0], header_str.size());
+        ofs.write(reinterpret_cast<char*>(data.buffer()), data.total_bytes());
+
+    }
 };
 
 } // namespace pl

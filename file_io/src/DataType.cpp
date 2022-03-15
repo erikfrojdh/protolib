@@ -3,7 +3,17 @@
 namespace pl {
 
 DataType::DataType(const std::type_info &t) {
-    if (t == typeid(int32_t))
+
+
+    if (t == typeid(int8_t))
+        type_ = TypeIndex::INT8;
+    else if (t == typeid(uint8_t))
+        type_ = TypeIndex::UINT8;
+    else if (t == typeid(int16_t))
+        type_ = TypeIndex::INT16;
+    else if (t == typeid(uint16_t))
+        type_ = TypeIndex::UINT16;
+    else if (t == typeid(int32_t))
         type_ = TypeIndex::INT32;
     else if (t == typeid(uint32_t))
         type_ = TypeIndex::UINT32;
@@ -41,7 +51,15 @@ DataType::DataType(std::string_view sv) {
     // we are done with the endianess so we can remove the prefix
     sv.remove_prefix(std::min(sv.find_first_not_of("<>"), sv.size()));
 
-    if (sv == "i4")
+    if (sv == "i1")
+        type_ = TypeIndex::INT8;
+    else if (sv == "u1")
+        type_ = TypeIndex::UINT8;
+    else if (sv == "i2")
+        type_ = TypeIndex::INT16;
+    else if (sv == "u2")
+        type_ = TypeIndex::UINT16;
+    else if (sv == "i4")
         type_ = TypeIndex::INT32;
     else if (sv == "u4")
         type_ = TypeIndex::UINT32;
@@ -59,15 +77,30 @@ DataType::DataType(std::string_view sv) {
 }
 
 std::string DataType::str() const {
+
+    char ec;
+    if (endian::native == endian::little)
+        ec = '<';
+    else
+        ec = '>';
+
     switch (type_) {
+    case TypeIndex::INT8:
+        return fmt::format("{}i1", ec);
+    case TypeIndex::UINT8:
+        return fmt::format("{}u1", ec);
+    case TypeIndex::INT16:
+        return fmt::format("{}i2", ec);
+    case TypeIndex::UINT16:
+        return fmt::format("{}u2", ec);
     case TypeIndex::INT32:
-        return "i4";
+        return fmt::format("{}i4", ec);
     case TypeIndex::UINT32:
-        return "u4";
+        return fmt::format("{}u4", ec);
     case TypeIndex::INT64:
-        return "i8";
+        return fmt::format("{}i8", ec);
     case TypeIndex::UINT64:
-        return "u8";
+        return fmt::format("{}u8", ec);
     case TypeIndex::FLOAT:
         return "f4";
     case TypeIndex::DOUBLE:
@@ -91,9 +124,5 @@ bool DataType::operator==(const std::type_info &t) const {
 bool DataType::operator!=(const std::type_info &t) const {
     return DataType(t) != *this;
 }
-
-// bool DataType::operator==(DataType::TypeIndex ti) const { return type_ == ti; }
-
-// bool DataType::operator!=(DataType::TypeIndex ti) const { return type_ != ti; }
 
 } // namespace pl

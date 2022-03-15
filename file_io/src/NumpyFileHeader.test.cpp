@@ -38,4 +38,16 @@ TEST_CASE("build string to write to"){
     auto s =  h.str();
     REQUIRE((s.size() % 64) == 0);
 
+    REQUIRE(s.substr(0,6) == "\x93NUMPY");
+    REQUIRE(s[6] == '\x01');
+    REQUIRE(s[7] == '\x00');
+    REQUIRE(*reinterpret_cast<uint16_t*>(&s[8]) == s.size()-10);
+
+    auto p1 = s.find("{");
+    auto p2 = s.find("}");
+
+    auto descr = s.substr(p1, p2-p1+1);
+    REQUIRE(descr == "{'descr': '<i4', 'fortran_order': False, 'shape': (19, 32,), }");
+    
+
 }
