@@ -8,6 +8,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 #Should we force this on the top level?
 find_package(fmt)
 
+find_package(TBB REQUIRED)
+
 option(USE_SANITIZER "Sanitizers for debugging" OFF)
 option(USE_TESTS "Unit tests" ON)
 option(USE_PYTHON "Unit tests" ON)
@@ -68,9 +70,12 @@ if(USE_TESTS)
 endif()
 
 
+
+
 add_subdirectory(array)
 add_subdirectory(core)
 add_subdirectory(file_io)
+add_subdirectory(processing)
 add_subdirectory(examples)
 
 if(USE_PYTHON)
@@ -83,4 +88,4 @@ if(LTO_AVAILABLE AND NOT DISABLE_LTO)
     set_property(TARGET protolib PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
 endif()
 set_property(TARGET protolib PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(protolib PRIVATE fmt::fmt project_options)
+target_link_libraries(protolib PRIVATE fmt::fmt project_options TBB::tbb)

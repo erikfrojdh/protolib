@@ -16,6 +16,8 @@
 // #include "typecaster.h"
 #include "protolib/protolib.hpp"
 
+#include "protolib/pedestal.hpp"
+
 #include <fcntl.h> // for the clean_read example
 
 using pl::File;
@@ -108,9 +110,9 @@ PYBIND11_MODULE(_protolib, m) {
         .def("__call__", &pl::Frame::operator());
 
     py::class_<pl::RawMasterFile>(m, "RawMasterFile")
-    .def(py::init<fs::path>())
-    .def(py::init<fs::path, pl::RawFileConfig>())
-    .def("read", &do_read<pl::RawMasterFile>);
+        .def(py::init<fs::path>())
+        .def(py::init<fs::path, pl::RawFileConfig>())
+        .def("read", &do_read<pl::RawMasterFile>);
 
     py::class_<pl::RawFileConfig>(m, "RawFileConfig")
         .def(py::init<>())
@@ -135,6 +137,33 @@ PYBIND11_MODULE(_protolib, m) {
                 return data;
             },
             py::arg() = 0);
+
+    /////////////////////////////////////////////////
+    // Processing functions
+    /////////////////////////////////////////////////
+
+    m.def("pd_from_file", [](const fs::path &fpath) {
+        auto *ptr = new pl::ImageData<double, 3>(pl::pd_from_file(fpath));
+        return return_image_data(ptr);
+    });
+
+    // m.def("apply_calibration", &pl::apply_calibration<double>,
+    //       py::arg().noconvert(), py::arg().noconvert(),
+    //       py::arg().noconvert());
+    m.def(
+        "apply_calibration",
+        [](py::array_t<uint16_t, py::array::c_style | py::array::forcecast>
+               raw_data,
+           py::array_t<double, py::array::c_style | py::array::forcecast> pd,
+           py::array_t<double, py::array::c_style | py::array::forcecast> cal) {
+            auto raw_span = make_span_2d(raw_data);
+            auto pd_span = make_span_3d(pd);
+            auto cal_span = make_span_3d(cal);
+            auto frame = new pl::ImageData<double, 2>(
+                pl::apply_calibration(raw_span, pd_span, cal_span));
+            return return_image_data(frame);
+        },
+        py::arg().noconvert(), py::arg().noconvert(), py::arg().noconvert());
 
     /////////////////////////////////////////////////
     // Testing, playing around and random bits of code

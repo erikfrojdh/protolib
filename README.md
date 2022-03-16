@@ -18,6 +18,8 @@ Support library for analyzing data from PSI pixel and strip detectors
 * pybind11 > 2.7.0
 * C++17? (module load gcc on RH7)
 * Optional HDF5 (for our files)
+* TBB? 
+* Optional ROOT? or make it an integral part? 
 
 ### Work in progress
 

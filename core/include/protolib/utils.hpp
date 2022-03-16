@@ -31,4 +31,8 @@ bool operator==(const std::array<ssize_t, Size>& lhs, const dynamic_shape &rhs) 
 }
 
 
+#define TIMED_FUNC(x, N) timed_func(#x, N, &x)
+void timed_func(std::string name, int n_times, void (*func)());
+
+
 }

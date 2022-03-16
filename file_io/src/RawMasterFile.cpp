@@ -19,16 +19,16 @@ RawMasterFile::RawMasterFile() {}
 // RawMasterFile::RawMasterFile(const fs::path &fname):RawMasterFile(fname,
 // RawMasterFile::config{}) {
 RawMasterFile::RawMasterFile(const fs::path &fname)
-    : RawMasterFile(fname, RawMasterFile::config{}) {
-}
+    : RawMasterFile(fname, RawMasterFile::config{}) {}
 
-RawMasterFile::RawMasterFile(const fs::path &fname, RawMasterFile::config cfg):cfg_(cfg) {
+RawMasterFile::RawMasterFile(const fs::path &fname, RawMasterFile::config cfg)
+    : cfg_(cfg) {
     parse_fname(fname);
     parse_master_file();
     find_number_of_subfiles();
 
-    if(cfg_ == RawMasterFile::config{}){
-        //do the default stuff
+    if (cfg_ == RawMasterFile::config{}) {
+        // do the default stuff
     }
     find_geometry();
     open_subfiles();
@@ -97,6 +97,9 @@ size_t RawMasterFile::bytes_per_frame() const {
     return cols_ * rows_ * bitdepth_ / 8;
 }
 
+int RawMasterFile::file_index() const { return findex; }
+void RawMasterFile::set_file_index(int i) { findex = i; }
+
 void RawMasterFile::read_into(std::byte *buffer) {
     // we got called with a contigious buffer
     // caller 100% has to make sure there is space!
@@ -106,8 +109,8 @@ void RawMasterFile::read_into(std::byte *buffer) {
     // optimize for the case where we can directly
     // write into the buffer (eg single column)
 
-    fmt::print("read_into\n");
-    fmt::print("cfg_.module_gap_row: {}\n", cfg_.module_gap_row);
+    // fmt::print("read_into\n");
+    // fmt::print("cfg_.module_gap_row: {}\n", cfg_.module_gap_row);
 
     if (cols_ == subfile_cols_) {
         for (auto &sf : subfiles) {
@@ -115,17 +118,16 @@ void RawMasterFile::read_into(std::byte *buffer) {
                 [&buffer](auto &f) {
                     f.read_into(buffer);
                     buffer += f.bytes_per_frame();
-
                 },
                 sf);
         }
     } else {
         for (auto &sf : subfiles) {
-            
+
             std::vector<std::byte> part(bytes_per_subframe());
-            fmt::print("bytes_per_subframe(): {}\n", bytes_per_subframe());
-            fmt::print("subfile_cols(): {}\n", subfile_cols());
-            fmt::print("subfile_rows(): {}\n", subfile_rows());
+            // fmt::print("bytes_per_subframe(): {}\n", bytes_per_subframe());
+            // fmt::print("subfile_cols(): {}\n", subfile_cols());
+            // fmt::print("subfile_rows(): {}\n", subfile_rows());
             const size_t line_length = cols_ * bitdepth_ / 8;
             const size_t subline_length = subfile_cols() * bitdepth_ / 8;
             std::visit(
@@ -239,7 +241,7 @@ void RawMasterFile::open_subfiles() {
                 subfiles.push_back(EigerTop<uint32_t>(
                     data_fname(i, 0), subfile_rows_, subfile_cols_));
 
-        }else if (type_ == DetectorType::Eiger && bitdepth_ == 16) {
+        } else if (type_ == DetectorType::Eiger && bitdepth_ == 16) {
             if (positions[i].row % 2)
                 subfiles.push_back(EigerBot<uint16_t>(
                     data_fname(i, 0), subfile_rows_, subfile_cols_));
@@ -247,7 +249,7 @@ void RawMasterFile::open_subfiles() {
                 subfiles.push_back(EigerTop<uint16_t>(
                     data_fname(i, 0), subfile_rows_, subfile_cols_));
 
-        }else if (type_ == DetectorType::Eiger && bitdepth_ == 8) {
+        } else if (type_ == DetectorType::Eiger && bitdepth_ == 8) {
             if (positions[i].row % 2)
                 subfiles.push_back(EigerBot<uint8_t>(
                     data_fname(i, 0), subfile_rows_, subfile_cols_));
@@ -272,7 +274,7 @@ ssize_t RawMasterFile::total_frames() const { return total_frames_; }
 int RawMasterFile::subfile_cols() const { return subfile_cols_; }
 int RawMasterFile::subfile_rows() const { return subfile_rows_; }
 uint8_t RawMasterFile::bitdepth() const { return bitdepth_; }
-uint8_t RawMasterFile::bytes_per_pixel() const{ return bitdepth_/8;}
+uint8_t RawMasterFile::bytes_per_pixel() const { return bitdepth_ / 8; }
 
 bool is_master_file(std::filesystem::path fpath) {
     std::string stem = fpath.stem();

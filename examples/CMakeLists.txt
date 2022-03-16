@@ -9,6 +9,7 @@ set(ExampleSrc
     e5_eiger.cpp
     e6_benchmark.cpp
     e7_save_numpy.cpp
+    e8_benchmark_pixelsum.cpp
 )
 
 foreach(FILE ${ExampleSrc})

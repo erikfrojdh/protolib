@@ -73,6 +73,9 @@ class RawMasterFile {
     std::filesystem::path data_fname(int mod_id, int file_id);
     std::filesystem::path master_fname() const;
 
+    int file_index() const;
+    void set_file_index(int i);
+
     // Query about the file content
     std::string version() const;
     // timestamp

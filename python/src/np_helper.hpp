@@ -71,3 +71,21 @@ py::array return_frame(pl::Frame *ptr) {
             reinterpret_cast<uint32_t *>(ptr->data()), free_when_done);
     return {};
 }
+
+
+//todo rewrite generic
+template <class T, int Flags> auto get_shape_3d(py::array_t<T, Flags> arr) {
+    return pl::Shape<3>{arr.shape(0), arr.shape(1), arr.shape(2)};
+}
+
+template <class T, int Flags> auto make_span_3d(py::array_t<T, Flags> arr) {
+    return pl::DataSpan<T, 3>(arr.mutable_data(), get_shape_3d<T, Flags>(arr));
+}
+
+template <class T, int Flags> auto get_shape_2d(py::array_t<T, Flags> arr) {
+    return pl::Shape<2>{arr.shape(0), arr.shape(1)};
+}
+
+template <class T, int Flags> auto make_span_2d(py::array_t<T, Flags> arr) {
+    return pl::DataSpan<T, 2>(arr.mutable_data(), get_shape_2d<T, Flags>(arr));
+}

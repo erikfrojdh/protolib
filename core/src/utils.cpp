@@ -1,6 +1,7 @@
 #include "protolib/utils.hpp"
 
 #include <sstream>
+#include <chrono>
 
 namespace pl{
 
@@ -53,5 +54,18 @@ template std::string vec2str(const std::vector<ssize_t> vec);
 
 template std::vector<int> str2vec(std::string_view sv);
 template std::string vec2str(const std::vector<int> vec);
+
+
+void timed_func(std::string name, int n_times, void (*func)()) {
+    auto t0 = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i != n_times; ++i) {
+        func();
+    }
+    auto t1 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> ms_double = t1 - t0;
+    fmt::print("{} took {}ms\n", name, ms_double.count());
+}
+
+
 }
 
