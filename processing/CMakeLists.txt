@@ -10,7 +10,7 @@ target_sources(protolib PRIVATE
 
 if(USE_TESTS)
     target_sources(tests PRIVATE 
-                    # ${CMAKE_CURRENT_SOURCE_DIR}/src/DataType.test.cpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/ClusterFinder.test.cpp
 
     )
 endif()

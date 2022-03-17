@@ -38,6 +38,8 @@ std::array<ssize_t, Ndim> make_array(const std::vector<ssize_t> &vec) {
 
 template <typename T, ssize_t Ndim> class DataSpan {
   public:
+    DataSpan(){};
+
     DataSpan(T *buffer, std::array<ssize_t, Ndim> shape)
         : buffer_(buffer), strides_(c_strides<Ndim>(shape)), shape_(shape),
           size_(std::accumulate(std::begin(shape), std::end(shape), 1,
@@ -111,10 +113,10 @@ template <typename T, ssize_t Ndim> class DataSpan {
     T *data() { return buffer_; }
 
   private:
-    T *buffer_;
-    const std::array<ssize_t, Ndim> strides_;
-    const std::array<ssize_t, Ndim> shape_;
-    ssize_t size_;
+    T *buffer_{nullptr};
+    std::array<ssize_t, Ndim> strides_{};
+    std::array<ssize_t, Ndim> shape_{};
+    ssize_t size_{};
 
     template <class BinaryOperation>
     DataSpan &elemenwise(T val, BinaryOperation op) {

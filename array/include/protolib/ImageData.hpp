@@ -61,7 +61,6 @@ template <typename T, ssize_t Ndim = 2> class ImageData {
     }
 
     ~ImageData() {
-        // fmt::print("~ImageData()\n");
         delete[] data_;
     }
 
@@ -90,7 +89,7 @@ template <typename T, ssize_t Ndim = 2> class ImageData {
             }
             return *this;
         } else {
-            throw(std::runtime_error("Shape of ImageDatas must match"));
+            throw(std::runtime_error("Shape of ImageData must match"));
         }
     }
 

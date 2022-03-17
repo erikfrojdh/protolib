@@ -176,3 +176,16 @@ TEST_CASE("Retrive shape"){
     REQUIRE(data.shape()[0] == 3);
     REQUIRE(data.shape()[1] == 4);
 }
+
+
+TEST_CASE("assignment"){
+    std::vector<int>data(10);
+    DataSpan<int,1> s1(data.data(), Shape<1>{static_cast<ssize_t>(data.size())});
+
+    DataSpan<int,1> s2;
+
+    s2 = s1;
+
+    REQUIRE(s2.size() == 10);
+    REQUIRE(s2.data()==s1.data());
+}

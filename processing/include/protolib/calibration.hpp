@@ -16,7 +16,6 @@ ImageData<T> apply_calibration(DataSpan<uint16_t, 2> raw_data,
 
     for (ssize_t row = 0; row != raw_data.shape(0); ++row) {
         for (ssize_t col = 0; col != raw_data.shape(1); ++col) {
-            img(row, col) = 5;
             auto pixel = raw_data(row,col);
             auto gain = get_gain(pixel);
             auto adc_val = get_value(pixel);
@@ -25,7 +24,6 @@ ImageData<T> apply_calibration(DataSpan<uint16_t, 2> raw_data,
             img(row, col) = val;
         }
     }
-
     return img;
 }
 

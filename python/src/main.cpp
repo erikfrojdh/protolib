@@ -14,9 +14,9 @@
 #include "np_helper.hpp"
 
 // #include "typecaster.h"
-#include "protolib/protolib.hpp"
-
+#include "protolib/ClusterFinder.hpp"
 #include "protolib/pedestal.hpp"
+#include "protolib/protolib.hpp"
 
 #include <fcntl.h> // for the clean_read example
 
@@ -164,6 +164,36 @@ PYBIND11_MODULE(_protolib, m) {
             return return_image_data(frame);
         },
         py::arg().noconvert(), py::arg().noconvert(), py::arg().noconvert());
+
+    PYBIND11_NUMPY_DTYPE(pl::ClusterFinder<double>::Hit, size, row, col, reserved, energy, max);
+
+    py::class_<pl::ClusterFinder<double>>(m, "ClusterFinder")
+        .def(py::init<pl::image_shape, double>())
+        .def("labeled",
+             [](pl::ClusterFinder<double> &self) {
+                 auto ptr = new pl::ImageData<int, 2>(self.labeled());
+                 return return_image_data(ptr);
+             })
+        .def("find_clusters",
+             [](pl::ClusterFinder<double> &self,
+                py::array_t<double, py::array::c_style | py::array::forcecast>
+                    img) { 
+                        auto img_span = make_span_2d(img);
+                        self.find_clusters(img_span); 
+                        })
+        .def("single_pass",
+             [](pl::ClusterFinder<double> &self,
+                py::array_t<double, py::array::c_style | py::array::forcecast>
+                    img) { 
+                        auto img_span = make_span_2d(img);
+                        self.single_pass(img_span); 
+                        })
+        .def("hits", [](pl::ClusterFinder<double> &self){
+            auto ptr = new std::vector<pl::ClusterFinder<double>::Hit>(self.steal_hits());
+            return return_vector(ptr);
+        })
+        .def("total_clusters", &pl::ClusterFinder<double>::total_clusters)
+        .def("print_connections", &pl::ClusterFinder<double>::print_connections);
 
     /////////////////////////////////////////////////
     // Testing, playing around and random bits of code

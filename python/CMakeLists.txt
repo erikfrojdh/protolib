@@ -19,6 +19,9 @@ configure_file( scripts/numpy_inspect.py
 
 set(PythonFiles
     __init__.py
+    root_helper.py
+    PythonClusterFinder.py
+    function.py
 )
 
 foreach(FILE ${PythonFiles})
