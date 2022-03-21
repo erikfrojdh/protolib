@@ -158,6 +158,9 @@ void RawMasterFile::read_into(std::byte *buffer, size_t n_frames) {
 }
 
 void RawMasterFile::seek(size_t frame_number) {
+    if (frame_number >= total_frames_)
+        throw std::runtime_error("Requested frame number is larger than "
+                                    "number of frames in file");
     for (auto &sf : subfiles) {
         std::visit([frame_number](auto &f) { f.seek(frame_number); }, sf);
     }
@@ -262,6 +265,10 @@ void RawMasterFile::open_subfiles() {
         else if (type_ == DetectorType::Jungfrau)
             subfiles.emplace_back(JungfrauRawFile(
                 data_fname(i, 0), subfile_rows_, subfile_cols_));
+        else if( type_ == DetectorType::Mythen3){
+            subfiles.push_back(EigerTop<uint32_t>(
+                    data_fname(i, 0), subfile_rows_, subfile_cols_));
+        }
         else
             throw std::runtime_error("File not supported");
     }

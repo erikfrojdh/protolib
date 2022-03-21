@@ -17,6 +17,7 @@ namespace pl {
 //  *read header from the file
 //  *read data from the file
 //  *Does it need to know the data type?
+// no bounds checking on this level
 
 template <typename T> struct crtp {
     T &underlying() { return static_cast<T &>(*this); }
@@ -30,15 +31,34 @@ class RawFile : public crtp<T> {
     FilePtr fp;
     const ssize_t rows_{};
     const ssize_t cols_{};
-    const size_t n_frames_{};
+    const size_t frames_per_file_{};
+    std::string base_name_template;
+    int sub_file_index_{};
+    void parse_fname(std::string fname) {
+        auto pos = fname.find_last_of('f');
+        if (pos == std::string::npos && pos < fname.size())
+            throw std::runtime_error(
+                "Malformed filename, should follow name_dX_fY_Z.raw");
+
+        // replace subfile index with {} to be used for formatting file names
+        ++pos;
+        size_t digits = 0;
+        sub_file_index_ = std::stoi(fname.substr(pos), &digits);
+        fname.replace(pos, digits, "{}");
+        base_name_template = std::move(fname);
+    }
 
   public:
     using value_type = DataType;
 
     RawFile(fs::path fname, ssize_t rows, ssize_t cols)
         : fp(fname.c_str()), rows_(rows), cols_(cols),
-          n_frames_(fs::file_size(fname) /
-                    (sizeof(Header) + sizeof(DataType) * rows_ * cols_)) {}
+          frames_per_file_(
+              fs::file_size(fname) /
+              (sizeof(Header) + sizeof(DataType) * rows_ * cols_)) {
+
+        parse_fname(fname);
+    }
 
     RawFile(const RawFile &) = delete;
     RawFile &operator=(const RawFile &) = delete;
@@ -46,15 +66,26 @@ class RawFile : public crtp<T> {
     RawFile &operator=(RawFile &&) = default;
     ~RawFile() = default;
 
-    size_t n_frames() const { return n_frames_; }
+    size_t n_frames() const { return frames_per_file_; }
     std::array<ssize_t, 2> shape() const { return {rows_, cols_}; }
 
     void seek(size_t frame_number) {
-        if (frame_number >= n_frames_)
-            throw std::runtime_error("Requested frame number is larger than "
-                                     "number of frames in file");
+        // if (frame_number >= frames_per_file_)
+        //     throw std::runtime_error("Requested frame number is larger than "
+        //                              "number of frames in file");
+ 
+        if (auto index = sub_file_index(frame_number); index != sub_file_index_) {
+            sub_file_index_ = index;
+            fp = FilePtr(fmt::format(base_name_template, sub_file_index_).c_str());
+        }
 
-        fseek(fp.get(), (sizeof(Header) + bytes_per_frame()) * frame_number,
+        size_t frame_number_in_file = frame_number % frames_per_file_;
+
+        fmt::print("Going to file: {} and position {}\n", sub_file_index_,
+                   frame_number_in_file);
+
+        fseek(fp.get(),
+              (sizeof(Header) + bytes_per_frame()) * frame_number_in_file,
               SEEK_SET);
     }
 
@@ -62,6 +93,10 @@ class RawFile : public crtp<T> {
         auto pos = ftell(fp.get());
         assert(pos % (sizeof(Header) + sizeof(DataType) * rows_ * cols_) == 0);
         return pos / (sizeof(Header) + sizeof(DataType) * rows_ * cols_);
+    }
+
+    int sub_file_index(size_t frame_number) const {
+        return frame_number / frames_per_file_;
     }
 
     Header read_header(size_t frame_number) {
@@ -160,7 +195,7 @@ using EigerRawFile32 = RawFile<sls_detector_header, uint32_t, Normal<uint32_t>>;
 using EigerRawFile8 = RawFile<sls_detector_header, uint8_t, Normal<uint8_t>>;
 
 using RawFileVariants =
-    std::variant<JungfrauRawFile, EigerTop<uint32_t>, EigerBot<uint32_t>, EigerBot<uint16_t>, EigerTop<uint8_t>,
-                 EigerBot<uint8_t>>;
+    std::variant<JungfrauRawFile, EigerTop<uint32_t>, EigerBot<uint32_t>,
+                 EigerBot<uint16_t>, EigerTop<uint8_t>, EigerBot<uint8_t>>;
 
 } // namespace pl

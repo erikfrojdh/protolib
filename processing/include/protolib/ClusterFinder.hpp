@@ -171,18 +171,6 @@ template <typename T> void ClusterFinder<T>::first_pass() {
 
 template <typename T> void ClusterFinder<T>::second_pass() {
 
-    // for (ssize_t i=0; i!=labeled_.size(); ++i){
-    //     auto current_label = labeled_(i);
-    //     if (current_label!=0){
-    //         auto it = child.find(current_label);
-    //         while(it != child.end()){
-    //             current_label = it->second;
-    //             it = child.find(current_label);
-    //         }
-    //         labeled_(i) = current_label;
-    //     }
-    // }
-
     for (ssize_t i = 0; i != labeled_.size(); ++i) {
         auto current_label = labeled_(i);
         if (current_label != 0) {
@@ -190,6 +178,8 @@ template <typename T> void ClusterFinder<T>::second_pass() {
             while (it != child.end()) {
                 current_label = it->second;
                 it = child.find(current_label);
+                //do this once before doing the second pass? 
+                //all values point to the final one...
             }
             labeled_(i) = current_label;
         }
@@ -201,6 +191,7 @@ template <typename T> void ClusterFinder<T>::store_clusters() {
     // Accumulate hit information in a map
     // Do we always have monotonic increasing
     // labels? Then vector?
+    // here the translation is label -> Hit
     std::unordered_map<int, Hit> h_size;
     for (int i = 0; i < shape_[0]; ++i) {
         for (int j = 0; j < shape_[1]; ++j) {
@@ -216,12 +207,10 @@ template <typename T> void ClusterFinder<T>::store_clusters() {
             }
         }
     }
-
-    // save hits to a vector
-    //  hits.reserve(hits.size() + h_size.size());
-    for (const auto &h : h_size) {
+    
+    for (const auto &h : h_size)
         hits.push_back(h.second);
-    }
+
 }
 
 } // namespace pl
