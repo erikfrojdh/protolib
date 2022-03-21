@@ -34,6 +34,7 @@ class RawFile : public crtp<T> {
     const size_t frames_per_file_{};
     std::string base_name_template;
     int sub_file_index_{};
+    size_t current_frame_{};
     void parse_fname(std::string fname) {
         auto pos = fname.find_last_of('f');
         if (pos == std::string::npos && pos < fname.size())
@@ -46,6 +47,11 @@ class RawFile : public crtp<T> {
         sub_file_index_ = std::stoi(fname.substr(pos), &digits);
         fname.replace(pos, digits, "{}");
         base_name_template = std::move(fname);
+    }
+    void open_next_file(){
+        ++sub_file_index_;
+        fp = FilePtr(fmt::format(base_name_template, sub_file_index_).c_str());
+        fmt::print(fmt::format(base_name_template, sub_file_index_).c_str());
     }
 
   public:
@@ -69,16 +75,11 @@ class RawFile : public crtp<T> {
     size_t n_frames() const { return frames_per_file_; }
     std::array<ssize_t, 2> shape() const { return {rows_, cols_}; }
 
-    void seek(size_t frame_number) {
-        // if (frame_number >= frames_per_file_)
-        //     throw std::runtime_error("Requested frame number is larger than "
-        //                              "number of frames in file");
- 
+    void seek(size_t frame_number) { 
         if (auto index = sub_file_index(frame_number); index != sub_file_index_) {
             sub_file_index_ = index;
             fp = FilePtr(fmt::format(base_name_template, sub_file_index_).c_str());
         }
-
         size_t frame_number_in_file = frame_number % frames_per_file_;
 
         fmt::print("Going to file: {} and position {}\n", sub_file_index_,
@@ -87,12 +88,14 @@ class RawFile : public crtp<T> {
         fseek(fp.get(),
               (sizeof(Header) + bytes_per_frame()) * frame_number_in_file,
               SEEK_SET);
+        current_frame_ = frame_number;
     }
 
     size_t tell() {
-        auto pos = ftell(fp.get());
-        assert(pos % (sizeof(Header) + sizeof(DataType) * rows_ * cols_) == 0);
-        return pos / (sizeof(Header) + sizeof(DataType) * rows_ * cols_);
+        return current_frame_;
+        // auto pos = ftell(fp.get());
+        // assert(pos % (sizeof(Header) + sizeof(DataType) * rows_ * cols_) == 0);
+        // return pos / (sizeof(Header) + sizeof(DataType) * rows_ * cols_);
     }
 
     int sub_file_index(size_t frame_number) const {
@@ -110,6 +113,12 @@ class RawFile : public crtp<T> {
     ssize_t rows() const { return rows_; }
 
     Header read_header() {
+        //need to check that we can read 
+        if(current_frame_=frames_per_file_*sub_file_index_){
+            open_next_file();
+        }
+
+
         Header h{};
         size_t rc = fread(reinterpret_cast<char *>(&h), sizeof(h), 1, fp.get());
         if (rc != 1)
