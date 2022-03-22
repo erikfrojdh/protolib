@@ -9,18 +9,18 @@ import boost_histogram as bh
 plt.ion()
 
 import seaborn as sns
-from protolib.PythonClusterFinder import PythonClusterFinder
+# from protolib.PythonClusterFinder import PythonClusterFinder
 
 
 path = pl.test_data_path()/"mythen3/series"
 fname = path/"run_master_0.raw"
 f = pl.File(fname)
 
-arr = f.read_frame()
+# arr = f.read_frame()
 
-f2 = open(path/"run_d0_f0_0.raw", 'rb')
-f2.seek(112)
-arr2 = np.fromfile(f2, dtype=np.uint32, count = 3840)
+# f2 = open(path/"run_d0_f0_0.raw", 'rb')
+# f2.seek(112)
+# arr2 = np.fromfile(f2, dtype=np.uint32, count = 3840)
 
 # # image = np.load(path/'sparse.npy')
 # # # image = image[337:353,168:192]

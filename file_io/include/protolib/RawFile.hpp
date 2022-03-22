@@ -114,15 +114,15 @@ class RawFile : public crtp<T> {
 
     Header read_header() {
         //need to check that we can read 
-        if(current_frame_=frames_per_file_*sub_file_index_){
+        if(current_frame_ == frames_per_file_ * sub_file_index_){
             open_next_file();
         }
-
 
         Header h{};
         size_t rc = fread(reinterpret_cast<char *>(&h), sizeof(h), 1, fp.get());
         if (rc != 1)
             throw std::runtime_error("File read failed");
+        // ++current_frame_;
         return h;
     }
 
@@ -135,6 +135,7 @@ class RawFile : public crtp<T> {
         size_t rc = this->underlying().read_impl(buffer);
         if (rc != 1)
             throw std::runtime_error("File read failed");
+        ++current_frame_;
         return h;
     }
 
