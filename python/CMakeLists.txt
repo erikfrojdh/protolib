@@ -19,6 +19,7 @@ configure_file( scripts/numpy_inspect.py
 
 set(PythonFiles
     __init__.py
+    folder_helper.py
     root_helper.py
     PythonClusterFinder.py
     function.py

@@ -16,8 +16,6 @@ https://numpy.org/devdocs/reference/generated/numpy.lib.format.html
 len(magic string) + 2 + len(length) + HEADER_LEN padded with space \x20
 */
 
-
-
 namespace pl {
 class NumpyFile {
     NumpyFileHeader header_;
@@ -28,13 +26,14 @@ class NumpyFile {
     NumpyFile(const std::filesystem::path &fpath);
     dynamic_shape shape() const;
     DataType dtype() const;
+    void close();
 
     template <typename T, ssize_t Ndim> ImageData<T, Ndim> read_as() {
         auto vec = shape();
         if (vec.size() != Ndim)
             throw std::runtime_error("pof");
 
-        //check that the type matches!
+        // check that the type matches!
 
         auto shape = make_array<Ndim>(vec);
 
@@ -45,10 +44,10 @@ class NumpyFile {
         return data;
     };
 
-    void close();
-
+    //Save any type that has a .shape(), ::value_type and .total_bytes()
+    //TODO! Generalize? 
     template <typename T>
-    static void save(std::filesystem::path fpath,  T& data){
+    static void save(std::filesystem::path fpath, T &data) {
 
         auto s = data.shape();
         dynamic_shape shape(s.begin(), s.end());
@@ -56,12 +55,10 @@ class NumpyFile {
         DataType dt(typeid(typename T::value_type));
         NumpyFileHeader h(dt, shape);
         auto header_str = h.str();
-        // header_str.back() = '\x0a';
 
         std::ofstream ofs(fpath);
         ofs.write(&header_str[0], header_str.size());
-        ofs.write(reinterpret_cast<char*>(data.buffer()), data.total_bytes());
-
+        ofs.write(reinterpret_cast<char *>(data.buffer()), data.total_bytes());
     }
 };
 

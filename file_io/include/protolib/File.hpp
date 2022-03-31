@@ -63,6 +63,7 @@ class File {
 
     // Reading
     Frame read_frame();
+    Frame read_frame(size_t fn);
     void read_into(std::byte *image_buf);
     void read_into(std::byte *image_buf, size_t n_frames);
     template <typename T> ImageData<T> read_as();

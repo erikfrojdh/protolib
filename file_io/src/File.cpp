@@ -39,6 +39,11 @@ Frame File::read_frame() {
     return frame;
 }
 
+Frame File::read_frame(size_t fn) {
+    seek(fn);
+    return read_frame();
+}
+
 uint8_t File::bytes_per_pixel() const { return meta.bitdepth / 8; }
 
 template <typename T> ImageData<T> File::read_as() {

@@ -1,6 +1,7 @@
 
 
 import protolib as pl
+from protolib import File
 import time
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,12 +10,41 @@ import boost_histogram as bh
 plt.ion()
 
 import seaborn as sns
+
+path = Path("/Users/erik/data/clara")
+pd_fname = pl.find_folder(path, '024')/'run_master_0.raw'
+print(f'First file for pedestal: {pd_fname}')
+pedestal = pl.pd_from_file(pd_fname)
+calibration = np.load('/Users/erik/software/clara/data/calibration.npy')
+
+data_fname = pl.find_folder(path, '026')/'run_master_0.raw'
+print(f'Loading: {data_fname}')
+t0 = time.perf_counter()
+total = pl.sum_raw_file_parallel(data_fname, pedestal, calibration, 10.)
+print(f"\nFinished in: {time.perf_counter()-t0:.3}s")      
+
 # from protolib.PythonClusterFinder import PythonClusterFinder
 
 
-path = pl.test_data_path()/"mythen3/series"
-fname = path/"run_master_0.raw"
-f = pl.File(fname)
+# path = pl.test_data_path()/"mythen3/"
+# fname = path/"TiScan_master_0.raw"
+
+
+# with File(fname) as f:
+#     y = np.zeros(f.total_frames())
+#     for i, frame in enumerate(f):
+#         y[i] = frame[600:1000].sum()
+
+# fig, ax = plt.subplots()
+# ax.plot(y)
+
+# with File(fname) as f: 
+#     y = [frame[600:1000].sum() for frame in f]
+# fig, ax = plt.subplots()
+# ax.plot(y)
+
+# for i in range(134):
+#     f.read_frame()
 
 # arr = f.read_frame()
 

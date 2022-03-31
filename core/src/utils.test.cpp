@@ -59,3 +59,14 @@ TEST_CASE("empty vector to string"){
     std::vector<int> vec;
     REQUIRE(pl::vec2str<int>(vec) == "()");
 }
+
+TEST_CASE("split a range in three parts"){
+    auto res = pl::split_task(0, 1000, 3);
+    REQUIRE(res.size()== 3);
+    REQUIRE(res[0].first == 0);
+    REQUIRE(res[0].second == 333);
+    REQUIRE(res[1].first == 333);
+    REQUIRE(res[1].second == 666);
+    REQUIRE(res[2].first == 666);
+    REQUIRE(res[2].second == 1000);
+}

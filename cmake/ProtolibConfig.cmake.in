@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+find_dependency(fmt REQUIRED)
+find_dependency(TBB REQUIRED)
+include(${CMAKE_CURRENT_LIST_DIR}/protolib.cmake)
+set_and_check(protolib_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set(protolib_LIBRARIES protliob::protolib)
+check_required_components(protolib)

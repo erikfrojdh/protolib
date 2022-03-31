@@ -23,6 +23,11 @@ RawMasterFile::RawMasterFile(const fs::path &fname)
 
 RawMasterFile::RawMasterFile(const fs::path &fname, RawMasterFile::config cfg)
     : cfg_(cfg) {
+    if (!fs::exists(fname)){
+        auto msg = fmt::format("File: {} not found", fname.c_str());
+        throw std::runtime_error(msg);
+    }
+        
     parse_fname(fname);
     parse_master_file();
     find_number_of_subfiles();
@@ -108,10 +113,6 @@ void RawMasterFile::read_into(std::byte *buffer) {
 
     // optimize for the case where we can directly
     // write into the buffer (eg single column)
-
-    // fmt::print("read_into\n");
-    // fmt::print("cfg_.module_gap_row: {}\n", cfg_.module_gap_row);
-
     if (cols_ == subfile_cols_) {
         for (auto &sf : subfiles) {
             std::visit(
@@ -125,9 +126,6 @@ void RawMasterFile::read_into(std::byte *buffer) {
         for (auto &sf : subfiles) {
 
             std::vector<std::byte> part(bytes_per_subframe());
-            // fmt::print("bytes_per_subframe(): {}\n", bytes_per_subframe());
-            // fmt::print("subfile_cols(): {}\n", subfile_cols());
-            // fmt::print("subfile_rows(): {}\n", subfile_rows());
             const size_t line_length = cols_ * bitdepth_ / 8;
             const size_t subline_length = subfile_cols() * bitdepth_ / 8;
             std::visit(
@@ -157,6 +155,14 @@ void RawMasterFile::read_into(std::byte *buffer, size_t n_frames) {
     }
 }
 
+size_t RawMasterFile::frame_number(size_t fn){
+    auto r = std::visit([fn](auto &f){
+        auto h = f.read_header(fn);
+        return h.frameNumber;}, subfiles[0]);
+    seek(fn);
+    return r;
+
+}
 void RawMasterFile::seek(size_t frame_number) {
     if (frame_number >= total_frames_)
         throw std::runtime_error("Requested frame number is larger than "
@@ -193,7 +199,6 @@ void RawMasterFile::parse_master_file() {
         if (key_pos != std::string::npos) {
             auto key = line.substr(0, key_pos + 1);
             auto value = line.substr(pos + 2);
-            // fmt::print("\"{}\": \"{}\"\n", key, value);
 
             // do the actual parsing
             if (key == "Version") {
@@ -221,6 +226,8 @@ void RawMasterFile::parse_master_file() {
     // JF doesn't write bitdepth to file
     if (type_ == DetectorType::Jungfrau)
         bitdepth_ = 16;
+
+    assert(bitdepth_ != 0);
 }
 
 FileInfo RawMasterFile::file_info() const {

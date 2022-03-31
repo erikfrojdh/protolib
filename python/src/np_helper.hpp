@@ -69,21 +69,31 @@ py::array return_frame(pl::Frame *ptr) {
     });
 
     const uint8_t item_size = ptr->bytes_per_pixel();
+    std::vector<ssize_t> shape;
+    for (auto val : ptr->shape())
+        if (val > 1)
+            shape.push_back(val);
+
+    std::vector<ssize_t> strides;
+    if (shape.size() == 1)
+        strides.push_back(item_size);
+    else if (shape.size() == 2) {
+        strides.push_back(item_size * shape[1]);
+        strides.push_back(item_size);
+    }
+
     if (item_size == 1)
         return py::array_t<uint8_t>(
-            std::array<ssize_t, 2>{ptr->rows(), ptr->cols()},
-            std::array<ssize_t, 2>{ptr->cols() * item_size, item_size},
+            shape, strides,
             reinterpret_cast<uint8_t *>(ptr->data()), free_when_done);
     else if (item_size == 2)
-        return py::array_t<uint16_t>(
-            std::array<ssize_t, 2>{ptr->rows(), ptr->cols()},
-            std::array<ssize_t, 2>{ptr->cols() * item_size, item_size},
-            reinterpret_cast<uint16_t *>(ptr->data()), free_when_done);
+        return py::array_t<uint16_t>(shape, strides,
+                                     reinterpret_cast<uint16_t *>(ptr->data()),
+                                     free_when_done);
     else if (item_size == 4)
-        return py::array_t<uint32_t>(
-            std::array<ssize_t, 2>{ptr->rows(), ptr->cols()},
-            std::array<ssize_t, 2>{ptr->cols() * item_size, item_size},
-            reinterpret_cast<uint32_t *>(ptr->data()), free_when_done);
+        return py::array_t<uint32_t>(shape, strides,
+                                     reinterpret_cast<uint32_t *>(ptr->data()),
+                                     free_when_done);
     return {};
 }
 

@@ -2,12 +2,17 @@ cmake_minimum_required(VERSION 3.12)
 project(protolib)
 set(PROJECT_VERSION 0.0.1)
 
+include(GNUInstallDirs)
+
+
+
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3") 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPLDEBUG")
 
 #Should we force this on the top level?
-find_package(fmt)
-
+find_package(fmt REQUIRED)
 find_package(TBB REQUIRED)
 
 option(USE_SANITIZER "Sanitizers for debugging" OFF)
@@ -61,6 +66,10 @@ if(TUNE_LOCAL)
     # 
 endif()
 
+
+set(PublicHeaders "")
+
+
 add_library(protolib STATIC)
 
 
@@ -88,4 +97,49 @@ if(LTO_AVAILABLE AND NOT DISABLE_LTO)
     set_property(TARGET protolib PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
 endif()
 set_property(TARGET protolib PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(protolib PRIVATE fmt::fmt project_options TBB::tbb)
+
+
+target_link_libraries(protolib 
+PRIVATE 
+    project_options 
+PUBLIC
+    fmt::fmt 
+    TBB::tbb
+)
+message(STATUS "${PublicHeaders}")
+set_target_properties(protolib PROPERTIES PUBLIC_HEADER 
+    "${PublicHeaders}"
+)
+
+install(TARGETS protolib EXPORT protolib
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/protolib
+)
+
+install(TARGETS project_options EXPORT protolib)
+
+install(EXPORT protolib
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/protolib
+    NAMESPACE protolib::
+)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    cmake/protolibConfig.cmake.in                      # the template file
+    ${CMAKE_CURRENT_BINARY_DIR}/protolibConfig.cmake   # destination
+    PATH_VARS CMAKE_INSTALL_INCLUDEDIR
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/protolib
+)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/protolibConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/protolibConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/protolibConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/protolib
+)

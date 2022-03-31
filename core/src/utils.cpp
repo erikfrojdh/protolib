@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <chrono>
+#include <utility>
 
 namespace pl{
 
@@ -67,5 +68,30 @@ void timed_func(std::string name, int n_times, void (*func)()) {
 }
 
 
-}
 
+
+std::vector<std::pair<ssize_t, ssize_t>> split_task(ssize_t first, ssize_t last,
+                                            ssize_t n_threads) {
+    std::vector<std::pair<ssize_t, ssize_t>> vec;
+    vec.reserve(n_threads);
+
+    ssize_t n_frames = last - first;
+
+    if (n_threads >= n_frames) {
+        for (int i = 0; i != n_frames; ++i) {
+            vec.push_back({i, i + 1});
+        }
+        return vec;
+    }
+
+    int step = (n_frames) / n_threads;
+    for (int i = 0; i != n_threads; ++i) {
+        int start = step * i;
+        int stop = step * (i + 1);
+        if (i == n_threads - 1)
+            stop = last;
+        vec.push_back({start, stop});
+    }
+    return vec;
+}
+}

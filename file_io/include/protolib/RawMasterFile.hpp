@@ -44,8 +44,8 @@ class RawMasterFile {
     ssize_t total_frames_{};
 
     std::string version_;
-    DetectorType type_;
-    TimingMode timing_mode_;
+    DetectorType type_{};
+    TimingMode timing_mode_{};
 
     int subfile_cols_{};
     int subfile_rows_{};
@@ -100,6 +100,7 @@ class RawMasterFile {
     // Reading
     void read_into(std::byte *buffer);
     void read_into(std::byte *buffer, size_t n_frames);
+    size_t frame_number(size_t fn);
 
     size_t tell();
     void seek(size_t frame_number);

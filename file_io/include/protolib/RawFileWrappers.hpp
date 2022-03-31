@@ -12,7 +12,7 @@ class RawFileWrapper : public FileWrapper {
         //initialized by RawMasterFile
     }
 
-    size_t frame_number(size_t fn) override { return 3; }
+    size_t frame_number(size_t fn) override { return m.frame_number(fn); }
 
     FileInfo file_info() const override{
         return m.file_info();

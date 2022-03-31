@@ -6,7 +6,21 @@
 
 
 target_sources(protolib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/Frame.cpp )
-target_include_directories(protolib PUBLIC include)
+target_include_directories(protolib PUBLIC 
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
+set(PublicHeaders 
+    ${PublicHeaders}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/protolib/DataSpan.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/protolib/Frame.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/protolib/ImageData.hpp
+    PARENT_SCOPE
+)
+
+
+
 
 if(USE_TESTS)
     target_sources(tests PRIVATE 

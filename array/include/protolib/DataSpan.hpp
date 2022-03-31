@@ -1,11 +1,11 @@
 #pragma once
+#include <algorithm>
 #include <array>
+#include <cassert>
 #include <numeric>
 #include <vector>
-#include <cassert>
-#include <algorithm>
 
-namespace pl{
+namespace pl {
 
 template <ssize_t Ndim> using Shape = std::array<ssize_t, Ndim>;
 
@@ -45,13 +45,11 @@ template <typename T, ssize_t Ndim> class DataSpan {
           size_(std::accumulate(std::begin(shape), std::end(shape), 1,
                                 std::multiplies<ssize_t>())) {}
 
-    DataSpan(T *buffer, const std::vector<ssize_t>& shape)
+    DataSpan(T *buffer, const std::vector<ssize_t> &shape)
         : buffer_(buffer), strides_(c_strides<Ndim>(make_array<Ndim>(shape))),
           shape_(make_array<Ndim>(shape)),
           size_(std::accumulate(std::begin(shape), std::end(shape), 1,
                                 std::multiplies<ssize_t>())) {}
-
-
 
     template <typename... Ix>
     typename std::enable_if<sizeof...(Ix) == Ndim, T &>::type
@@ -61,21 +59,23 @@ template <typename T, ssize_t Ndim> class DataSpan {
 
     template <typename... Ix>
     typename std::enable_if<sizeof...(Ix) == Ndim, T &>::type
-    operator()(Ix... index) const{
+    operator()(Ix... index) const {
         return buffer_[element_offset(strides_, index...)];
     }
 
     ssize_t size() const { return size_; }
 
-    DataSpan(const DataSpan&) = default;
-    DataSpan(DataSpan&&) = default;
-    
+    DataSpan(const DataSpan &) = default;
+    DataSpan(DataSpan &&) = default;
+
     T *begin() { return buffer_; }
     T *end() { return buffer_ + size_; }
     T &operator()(ssize_t i) { return buffer_[i]; }
     T &operator[](ssize_t i) { return buffer_[i]; }
 
-    DataSpan &operator+=(const T val) { return elemenwise(val, std::plus<T>()); }
+    DataSpan &operator+=(const T val) {
+        return elemenwise(val, std::plus<T>());
+    }
     DataSpan &operator-=(const T val) {
         return elemenwise(val, std::minus<T>());
     }
@@ -96,19 +96,15 @@ template <typename T, ssize_t Ndim> class DataSpan {
         return *this;
     }
 
-    DataSpan& operator=(const DataSpan& other){
+    DataSpan &operator=(const DataSpan &other) {
         shape_ = other.shape_;
         strides_ = other.strides_;
         size_ = other.size_;
         buffer_ = other.buffer_;
         return *this;
     }
-    auto& shape(){
-        return shape_;
-    }
-    auto shape(ssize_t i) const {
-        return shape_[i];
-    }
+    auto &shape() { return shape_; }
+    auto shape(ssize_t i) const { return shape_[i]; }
 
     T *data() { return buffer_; }
 
@@ -136,4 +132,4 @@ template <typename T, ssize_t Ndim> class DataSpan {
 
 // template class DataSpan<uint16_t, 2>;
 
-}
+} // namespace pl
