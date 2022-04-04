@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
-project(protolib)
-set(PROJECT_VERSION 0.0.1)
+project(protolib 
+    VERSION 0.0.1
+    DESCRIPTION "Data processing library for PSI hybrid detectors"
+    HOMEPAGE_URL "https://github.com/erikfrojdh/protolib"
+    LANGUAGES C CXX
+)
+
 
 include(GNUInstallDirs)
 
@@ -14,7 +19,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")  #TODO! This is Linux specific
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPLDEBUG")
 
 #Should we force this on the top level?
-find_package(fmt REQUIRED)
+find_package(fmt 6 REQUIRED)
 find_package(TBB REQUIRED)
 
 option(USE_SANITIZER "Sanitizers for debugging" OFF)
@@ -40,6 +45,11 @@ target_compile_options(project_options INTERFACE
                                             -Wdouble-promotion
                                             -Werror=return-type
                                  )
+
+
+if(NOT APPLE)
+    set(CMAKE_INSTALL_RPATH $ORIGIN})
+endif()
 
 #Enable LTO if available
 include(CheckIPOSupported)
@@ -76,7 +86,7 @@ FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download
 FetchContent_MakeAvailable(json)
 
 
-add_library(protolib STATIC)
+add_library(protolib SHARED)
 
 
 if(USE_TESTS)
@@ -99,7 +109,10 @@ endif()
 if(LTO_AVAILABLE AND NOT DISABLE_LTO)
     set_property(TARGET protolib PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
 endif()
-set_property(TARGET protolib PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET protolib 
+    PROPERTY POSITION_INDEPENDENT_CODE ON
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    VERSION ${PROJECT_VERSION})
 
 
 target_link_libraries(protolib 
@@ -117,6 +130,9 @@ set_target_properties(protolib PROPERTIES PUBLIC_HEADER
 
 install(TARGETS protolib EXPORT protolib
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/protolib
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 install(TARGETS project_options EXPORT protolib)

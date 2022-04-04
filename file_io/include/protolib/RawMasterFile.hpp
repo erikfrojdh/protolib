@@ -42,7 +42,7 @@ class RawMasterFile {
     std::string base_name;
     int findex{};
     int n_subfiles_{};
-    ssize_t total_frames_{};
+    size_t total_frames_{};
 
     std::string version_;
     DetectorType type_{};
@@ -92,7 +92,7 @@ class RawMasterFile {
     size_t bytes_per_subframe() const;
 
     int n_subfiles() const;
-    ssize_t total_frames() const;
+    size_t total_frames() const;
     uint8_t bitdepth() const;
     uint8_t bytes_per_pixel() const;
 
