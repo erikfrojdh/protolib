@@ -38,6 +38,7 @@ class RawMasterFile {
 
   private:
     std::filesystem::path base_path;
+    std::string ext;
     std::string base_name;
     int findex{};
     int n_subfiles_{};
@@ -84,8 +85,8 @@ class RawMasterFile {
 
     int subfile_rows() const;
     int subfile_cols() const;
-    int cols() const;
-    int rows() const;
+    ssize_t cols() const;
+    ssize_t rows() const;
 
     size_t bytes_per_frame() const;
     size_t bytes_per_subframe() const;

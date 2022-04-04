@@ -71,3 +71,14 @@ TEST_CASE("Loop over multi part files") {
     }
     delete[] buffer;
 }
+
+
+TEST_CASE("json master file"){
+    auto fpath = pl::test_data_path() / "mythen3/run_v7_master_0.json";
+    RawMasterFile f(fpath);
+    REQUIRE(f.total_frames() == 10);
+    REQUIRE(f.type() == pl::DetectorType::Mythen3);
+    REQUIRE(f.version() == "7.0");
+    REQUIRE(f.subfile_rows()== 1);
+    REQUIRE(f.subfile_cols()== 3840);
+}

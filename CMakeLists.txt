@@ -1,14 +1,16 @@
 cmake_minimum_required(VERSION 3.12)
+set(CMAKE_CXX_STANDARD 17)
 project(protolib)
 set(PROJECT_VERSION 0.0.1)
 
 include(GNUInstallDirs)
 
-
+include(cmake/protolib_helpers.cmake)
+default_build_type("Release")
 
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3") 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")  #TODO! This is Linux specific
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPLDEBUG")
 
 #Should we force this on the top level?
@@ -17,17 +19,17 @@ find_package(TBB REQUIRED)
 
 option(USE_SANITIZER "Sanitizers for debugging" OFF)
 option(USE_TESTS "Unit tests" ON)
-option(USE_PYTHON "Unit tests" ON)
-option(TUNE_LOCAL "local arch" ON)
-option(DISABLE_LTO "dont use lto" OFF)
+option(USE_PYTHON "Python bindings" ON)
+option(TUNE_LOCAL "Tune to exact CPU architecture" ON)
+option(DISABLE_LTO "Disable Link Time Optimizations" OFF)
 
 add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_17)
+target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 target_compile_options(project_options INTERFACE 
                                             -Wall
                                             -Wextra
                                             -Wno-unused-parameter
-                                            # -Wold-style-cast
+                                            -Wold-style-cast
                                             -Wnon-virtual-dtor
                                             -Woverloaded-virtual
                                             -Wdouble-promotion
@@ -69,6 +71,10 @@ endif()
 
 set(PublicHeaders "")
 
+include(FetchContent)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 
 add_library(protolib STATIC)
 
@@ -77,9 +83,6 @@ if(USE_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
-
-
-
 
 add_subdirectory(array)
 add_subdirectory(core)
@@ -102,11 +105,12 @@ set_property(TARGET protolib PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(protolib 
 PRIVATE 
     project_options 
+    nlohmann_json::nlohmann_json
 PUBLIC
     fmt::fmt 
     TBB::tbb
 )
-message(STATUS "${PublicHeaders}")
+
 set_target_properties(protolib PROPERTIES PUBLIC_HEADER 
     "${PublicHeaders}"
 )

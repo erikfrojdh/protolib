@@ -7,6 +7,9 @@
 #include <cstring>
 #include <fmt/core.h>
 #include <fstream>
+
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 namespace fs = std::filesystem;
 
 // TODO! Push more knowledge into the subfiles
@@ -16,18 +19,16 @@ namespace pl {
 
 RawMasterFile::RawMasterFile() {}
 
-// RawMasterFile::RawMasterFile(const fs::path &fname):RawMasterFile(fname,
-// RawMasterFile::config{}) {
 RawMasterFile::RawMasterFile(const fs::path &fname)
     : RawMasterFile(fname, RawMasterFile::config{}) {}
 
 RawMasterFile::RawMasterFile(const fs::path &fname, RawMasterFile::config cfg)
     : cfg_(cfg) {
-    if (!fs::exists(fname)){
+    if (!fs::exists(fname)) {
         auto msg = fmt::format("File: {} not found", fname.c_str());
         throw std::runtime_error(msg);
     }
-        
+
     parse_fname(fname);
     parse_master_file();
     find_number_of_subfiles();
@@ -39,9 +40,10 @@ RawMasterFile::RawMasterFile(const fs::path &fname, RawMasterFile::config cfg)
     open_subfiles();
 }
 
-void RawMasterFile::parse_fname(const std::filesystem::path &fname) {
+void RawMasterFile::parse_fname(const fs::path &fname) {
     base_path = fname.parent_path();
     base_name = fname.stem();
+    ext = fname.extension();
 
     auto pos = base_name.rfind("_");
     findex = std::stoi(base_name.substr(pos + 1));
@@ -68,12 +70,11 @@ fs::path RawMasterFile::data_fname(int mod_id, int file_id) {
 }
 
 fs::path RawMasterFile::master_fname() const {
-    return base_path / fmt::format("{}_master_{}.raw", base_name, findex);
+    return base_path / fmt::format("{}_master_{}{}", base_name, findex, ext);
 }
 
-int RawMasterFile::rows() const { return rows_; }
-
-int RawMasterFile::cols() const { return cols_; }
+ssize_t RawMasterFile::rows() const { return rows_; }
+ssize_t RawMasterFile::cols() const { return cols_; }
 
 void RawMasterFile::find_geometry() {
     uint16_t r{};
@@ -155,18 +156,20 @@ void RawMasterFile::read_into(std::byte *buffer, size_t n_frames) {
     }
 }
 
-size_t RawMasterFile::frame_number(size_t fn){
-    auto r = std::visit([fn](auto &f){
-        auto h = f.read_header(fn);
-        return h.frameNumber;}, subfiles[0]);
+size_t RawMasterFile::frame_number(size_t fn) {
+    auto r = std::visit(
+        [fn](auto &f) {
+            auto h = f.read_header(fn);
+            return h.frameNumber;
+        },
+        subfiles[0]);
     seek(fn);
     return r;
-
 }
 void RawMasterFile::seek(size_t frame_number) {
     if (frame_number >= total_frames_)
         throw std::runtime_error("Requested frame number is larger than "
-                                    "number of frames in file");
+                                 "number of frames in file");
     for (auto &sf : subfiles) {
         std::visit([frame_number](auto &f) { f.seek(frame_number); }, sf);
     }
@@ -185,42 +188,60 @@ size_t RawMasterFile::tell() {
 
 void RawMasterFile::parse_master_file() {
     std::ifstream ifs(master_fname());
-    for (std::string line; std::getline(ifs, line);) {
 
-        if (line == "#Frame Header")
-            break;
+    //Parse old style master file
+    if (ext == ".raw") {
+        for (std::string line; std::getline(ifs, line);) {
 
-        auto pos = line.find(":");
-        auto key_pos = pos;
+            if (line == "#Frame Header")
+                break;
 
-        while (key_pos != std::string::npos && std::isspace(line[--key_pos]))
-            ;
+            auto pos = line.find(":");
+            auto key_pos = pos;
 
-        if (key_pos != std::string::npos) {
-            auto key = line.substr(0, key_pos + 1);
-            auto value = line.substr(pos + 2);
+            while (key_pos != std::string::npos &&
+                   std::isspace(line[--key_pos]))
+                ;
 
-            // do the actual parsing
-            if (key == "Version") {
-                version_ = value;
-            } else if (key == "TimeStamp") {
+            if (key_pos != std::string::npos) {
+                auto key = line.substr(0, key_pos + 1);
+                auto value = line.substr(pos + 2);
 
-            } else if (key == "Detector Type") {
-                type_ = StringTo<DetectorType>(value);
-            } else if (key == "Timing Mode") {
-                timing_mode_ = StringTo<TimingMode>(value);
-            } else if (key == "Pixels") {
-                // Total number of pixels cannot be found yet looking at
-                // submodule
-                auto pos = value.find(',');
-                subfile_cols_ = std::stoi(value.substr(1, pos));
-                subfile_rows_ = std::stoi(value.substr(pos + 1));
-            } else if (key == "Total Frames") {
-                total_frames_ = std::stoi(value);
-            } else if (key == "Dynamic Range") {
-                bitdepth_ = std::stoi(value);
+                // do the actual parsing
+                if (key == "Version") {
+                    version_ = value;
+                } else if (key == "TimeStamp") {
+
+                } else if (key == "Detector Type") {
+                    type_ = StringTo<DetectorType>(value);
+                } else if (key == "Timing Mode") {
+                    timing_mode_ = StringTo<TimingMode>(value);
+                } else if (key == "Pixels") {
+                    // Total number of pixels cannot be found yet looking at
+                    // submodule
+                    auto pos = value.find(',');
+                    subfile_cols_ = std::stoi(value.substr(1, pos));
+                    subfile_rows_ = std::stoi(value.substr(pos + 1));
+                } else if (key == "Total Frames") {
+                    total_frames_ = std::stoi(value);
+                } else if (key == "Dynamic Range") {
+                    bitdepth_ = std::stoi(value);
+                }
             }
         }
+    }else if(ext == ".json"){
+        json j;
+        ifs >> j;
+        double v = j["Version"];
+        version_ = fmt::format("{:.1f}", v); //TODO parse Major ver minor ver?
+        type_ = StringTo<DetectorType>(j["Detector Type"].get<std::string>());
+        timing_mode_ = StringTo<TimingMode>(j["Timing Mode"].get<std::string>());
+        total_frames_ = j["Frames in File"];
+        subfile_cols_ = j["Pixels"]["x"];
+        subfile_rows_ = j["Pixels"]["y"];
+        bitdepth_ = j["Dynamic Range"];
+    }else{
+        throw std::runtime_error("Not a master file");
     }
 
     // JF doesn't write bitdepth to file
@@ -272,11 +293,10 @@ void RawMasterFile::open_subfiles() {
         else if (type_ == DetectorType::Jungfrau)
             subfiles.emplace_back(JungfrauRawFile(
                 data_fname(i, 0), subfile_rows_, subfile_cols_));
-        else if( type_ == DetectorType::Mythen3){
+        else if (type_ == DetectorType::Mythen3) {
             subfiles.push_back(EigerTop<uint32_t>(
-                    data_fname(i, 0), subfile_rows_, subfile_cols_));
-        }
-        else
+                data_fname(i, 0), subfile_rows_, subfile_cols_));
+        } else
             throw std::runtime_error("File not supported");
     }
 }
