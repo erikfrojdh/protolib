@@ -16,7 +16,7 @@ File::File(const fs::path &fpath) {
         
 
     // Find file type at this time only raw files
-    if (fpath.extension() == ".raw" && is_master_file(fpath)) {
+    if ((fpath.extension() == ".raw" || fpath.extension() == ".json") && is_master_file(fpath)) {
         fp = std::make_unique<RawFileWrapper>(fpath);
         meta = fp->file_info();
     } else {

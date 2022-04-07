@@ -103,7 +103,7 @@ add_subdirectory(examples)
 
 if(USE_PYTHON)
     find_package (Python 3.6 COMPONENTS Interpreter Development)
-    find_package(pybind11)
+    find_package(pybind11 2.7 REQUIRED)
     add_subdirectory(python)
 endif()
 
