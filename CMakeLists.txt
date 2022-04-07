@@ -21,11 +21,12 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPLDEBUG")
 #Should we force this on the top level?
 find_package(fmt 6 REQUIRED)
 find_package(TBB REQUIRED)
+find_package(Threads REQUIRED)
 
 option(USE_SANITIZER "Sanitizers for debugging" OFF)
-option(USE_TESTS "Unit tests" ON)
-option(USE_PYTHON "Python bindings" ON)
-option(TUNE_LOCAL "Tune to exact CPU architecture" ON)
+option(USE_TESTS "Unit tests" OFF)
+option(USE_PYTHON "Python bindings" OFF)
+option(TUNE_LOCAL "Tune to exact CPU architecture" OFF)
 option(DISABLE_LTO "Disable Link Time Optimizations" OFF)
 
 add_library(project_options INTERFACE)
@@ -122,12 +123,15 @@ PRIVATE
 PUBLIC
     fmt::fmt 
     TBB::tbb
+    Threads::Threads
 )
 
-set_target_properties(protolib PROPERTIES PUBLIC_HEADER 
-    "${PublicHeaders}"
+set_target_properties(protolib PROPERTIES 
+    PUBLIC_HEADER "${PublicHeaders}"
+    POSITION_INDEPENDENT_CODE ON
 )
 
+set_property(TARGET lib1 PROPERTY POSITION_INDEPENDENT_CODE ON)
 install(TARGETS protolib EXPORT protolib
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/protolib
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
