@@ -119,7 +119,7 @@ class RawFile : public crtp<T> {
     Header read_header() {
         // need to check that we can read
         if (current_frame_ == frames_per_file_ * (sub_file_index_ + 1)) {
-            open_file(sub_file_index_+1);
+            open_file(sub_file_index_ + 1);
         }
 
         Header h{};
@@ -131,10 +131,11 @@ class RawFile : public crtp<T> {
         ssize_t expected =
             frame_in_file * (bytes_per_frame() + sizeof(Header)) +
             sizeof(Header);
-        // fmt::print("frame_in_file: {}\npos: {}\nexpected: {}\n", frame_in_file, pos, expected);
+        // fmt::print("frame_in_file: {}\npos: {}\nexpected: {}\n",
+        // frame_in_file, pos, expected);
         assert(pos == expected);
 #endif
-            
+
         if (rc != 1)
             throw std::runtime_error("Could not read header from file");
         return h;
@@ -163,6 +164,8 @@ class RawFile : public crtp<T> {
     }
 
     size_t bytes_per_frame() const { return sizeof(DataType) * rows_ * cols_; }
+
+    size_t pixels_per_frame() const { return rows_ * cols_; }
 
     ImageData<DataType> read_frame() {
         ImageData<DataType> img({rows_, cols_});
@@ -209,17 +212,61 @@ struct FlipRows : public RawFile<sls_detector_header, T, FlipRows<T>> {
     }
 };
 
+template <class T>
+struct ReorderM03 : public RawFile<sls_detector_header, T, ReorderM03<T>> {
+    size_t read_impl(std::byte *buffer) {
+
+        // TODO! Cleanup =)
+        std::vector<T> tmp(ReorderM03::pixels_per_frame());
+        size_t rc =
+            fread(reinterpret_cast<char *>(&tmp[0]),
+                  ReorderM03::bytes_per_frame(), 1, ReorderM03::fp.get());
+
+        int adc_nr[32] = {300, 325, 350, 375, 300, 325, 350, 375, 200, 225, 250,
+                          275, 200, 225, 250, 275, 100, 125, 150, 175, 100, 125,
+                          150, 175, 0,   25,  50,  75,  0,   25,  50,  75};
+        int sc_width = 25;
+        int nadc = 32;
+        int pixels_per_sc = 5000;
+
+        auto dst = reinterpret_cast<T *>(buffer);
+        int pixel = 0;
+        for (int i = 0; i != pixels_per_sc; ++i) {
+            for (int i_adc= 0; i_adc != nadc; ++i_adc) {
+                int col = adc_nr[i_adc] + (i % sc_width);
+                int row;
+                if ((i_adc / 4) % 2 == 0)
+                    row = 199 - int(i / sc_width);
+                else
+                    row = 200 + int(i / sc_width);
+
+                dst[col + row * 400] = tmp[pixel];
+                pixel++;
+            }
+        }
+        // for (size_t i = 0; i<ReorderM03::pixels_per_frame(); ++i)
+        //     dst[i] = tmp[i];
+
+        // memcpy(buffer, &tmp[0], ReorderM03::bytes_per_frame());
+        return rc;
+    }
+};
+
 template <class T> using EigerTop = RawFile<sls_detector_header, T, Normal<T>>;
 template <class T>
 using EigerBot = RawFile<sls_detector_header, T, FlipRows<T>>;
 
 using JungfrauRawFile =
     RawFile<sls_detector_header, uint16_t, Normal<uint16_t>>;
+using Moench03RawFile =
+    RawFile<sls_detector_header, uint16_t, ReorderM03<uint16_t>>;
 using EigerRawFile32 = RawFile<sls_detector_header, uint32_t, Normal<uint32_t>>;
 using EigerRawFile8 = RawFile<sls_detector_header, uint8_t, Normal<uint8_t>>;
 
+// double check usage
 using RawFileVariants =
-    std::variant<JungfrauRawFile, EigerTop<uint32_t>, EigerBot<uint32_t>,
-                 EigerBot<uint16_t>, EigerTop<uint8_t>, EigerBot<uint8_t>>;
+    std::variant<Moench03RawFile, JungfrauRawFile, EigerTop<uint32_t>,
+                 EigerBot<uint32_t>, EigerBot<uint16_t>, EigerTop<uint8_t>,
+                 EigerBot<uint8_t>>;
 
 } // namespace pl

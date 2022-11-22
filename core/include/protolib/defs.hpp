@@ -27,7 +27,7 @@ typedef struct {
     uint8_t packetMask[64];
 } sls_detector_header;
 
-enum class DetectorType { Jungfrau, Eiger, Mythen3 };
+enum class DetectorType { Jungfrau, Eiger, Mythen3, Moench };
 
 enum class TimingMode {Auto, Trigger};
 

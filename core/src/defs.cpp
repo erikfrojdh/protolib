@@ -11,6 +11,8 @@ template <> DetectorType StringTo(std::string_view name) {
         return DetectorType::Eiger;
     else if (name == "Mythen3")
         return DetectorType::Mythen3;
+    else if (name == "Moench")
+        return DetectorType::Moench;
     else {
         auto msg = fmt::format("Could not decode dector from: \"{}\"", name);
         throw std::runtime_error(msg);

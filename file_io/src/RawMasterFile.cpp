@@ -239,7 +239,10 @@ void RawMasterFile::parse_master_file() {
         total_frames_ = j["Frames in File"];
         subfile_cols_ = j["Pixels"]["x"];
         subfile_rows_ = j["Pixels"]["y"];
-        bitdepth_ = j["Dynamic Range"];
+        if(type_ ==  DetectorType::Moench)
+            bitdepth_ = 16;
+        else
+            bitdepth_ = j["Dynamic Range"];
     }else{
         throw std::runtime_error("Not a master file");
     }
@@ -288,15 +291,16 @@ void RawMasterFile::open_subfiles() {
                 subfiles.push_back(EigerTop<uint8_t>(
                     data_fname(i, 0), subfile_rows_, subfile_cols_));
 
-        }
-
-        else if (type_ == DetectorType::Jungfrau)
+        } else if (type_ == DetectorType::Jungfrau)
             subfiles.emplace_back(JungfrauRawFile(
                 data_fname(i, 0), subfile_rows_, subfile_cols_));
-        else if (type_ == DetectorType::Mythen3) {
+        else if (type_ == DetectorType::Mythen3) 
             subfiles.push_back(EigerTop<uint32_t>(
                 data_fname(i, 0), subfile_rows_, subfile_cols_));
-        } else
+        else if (type_ == DetectorType::Moench)
+            subfiles.emplace_back(Moench03RawFile(
+                data_fname(i, 0), subfile_rows_, subfile_cols_));
+         else
             throw std::runtime_error("File not supported");
     }
 }
