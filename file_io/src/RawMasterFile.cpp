@@ -189,7 +189,7 @@ size_t RawMasterFile::tell() {
 void RawMasterFile::parse_master_file() {
     std::ifstream ifs(master_fname());
 
-    //Parse old style master file
+    // Parse old style master file
     if (ext == ".raw") {
         for (std::string line; std::getline(ifs, line);) {
 
@@ -226,24 +226,33 @@ void RawMasterFile::parse_master_file() {
                     total_frames_ = std::stoi(value);
                 } else if (key == "Dynamic Range") {
                     bitdepth_ = std::stoi(value);
+                } else if (key == "Quad") {
+                    quad_ = (value == "1");
+                    std::cout << "Quad: " << quad_ << "\n";
                 }
             }
         }
-    }else if(ext == ".json"){
+    } else if (ext == ".json") {
         json j;
         ifs >> j;
         double v = j["Version"];
-        version_ = fmt::format("{:.1f}", v); //TODO parse Major ver minor ver?
+        version_ = fmt::format("{:.1f}", v); // TODO parse Major ver minor ver?
         type_ = StringTo<DetectorType>(j["Detector Type"].get<std::string>());
-        timing_mode_ = StringTo<TimingMode>(j["Timing Mode"].get<std::string>());
+        timing_mode_ =
+            StringTo<TimingMode>(j["Timing Mode"].get<std::string>());
         total_frames_ = j["Frames in File"];
         subfile_cols_ = j["Pixels"]["x"];
         subfile_rows_ = j["Pixels"]["y"];
-        if(type_ ==  DetectorType::Moench)
+        if (type_ == DetectorType::Moench)
             bitdepth_ = 16;
         else
             bitdepth_ = j["Dynamic Range"];
-    }else{
+
+        // only Eiger had quad
+        if (type_ == DetectorType::Eiger) {
+            quad_ = (j["Quad"] == 1);
+        }
+    } else {
         throw std::runtime_error("Not a master file");
     }
 
@@ -266,41 +275,49 @@ FileInfo RawMasterFile::file_info() const {
 
 void RawMasterFile::open_subfiles() {
     for (int i = 0; i != n_subfiles_; ++i) {
-        // fmt::print("{}: {}\n", i, data_fname(i, 0).c_str());
-        if (type_ == DetectorType::Eiger && bitdepth_ == 32) {
-            if (positions[i].row % 2)
-                subfiles.push_back(EigerBot<uint32_t>(
-                    data_fname(i, 0), subfile_rows_, subfile_cols_));
-            else
-                subfiles.push_back(EigerTop<uint32_t>(
-                    data_fname(i, 0), subfile_rows_, subfile_cols_));
+        fmt::print("{}: {}\n", i, data_fname(i, 0).c_str());
+        if (type_ == DetectorType::Eiger) {
+            bool flip = positions[i].row % 2;
+            if (quad_)
+                flip = !flip;
 
-        } else if (type_ == DetectorType::Eiger && bitdepth_ == 16) {
-            if (positions[i].row % 2)
-                subfiles.push_back(EigerBot<uint16_t>(
-                    data_fname(i, 0), subfile_rows_, subfile_cols_));
-            else
-                subfiles.push_back(EigerTop<uint16_t>(
-                    data_fname(i, 0), subfile_rows_, subfile_cols_));
+            if (bitdepth_ == 32) {
+                if (flip)
+                    subfiles.push_back(EigerBot<uint32_t>(
+                        data_fname(i, 0), subfile_rows_, subfile_cols_));
+                else
+                    subfiles.push_back(EigerTop<uint32_t>(
+                        data_fname(i, 0), subfile_rows_, subfile_cols_));
 
-        } else if (type_ == DetectorType::Eiger && bitdepth_ == 8) {
-            if (positions[i].row % 2)
-                subfiles.push_back(EigerBot<uint8_t>(
-                    data_fname(i, 0), subfile_rows_, subfile_cols_));
-            else
-                subfiles.push_back(EigerTop<uint8_t>(
-                    data_fname(i, 0), subfile_rows_, subfile_cols_));
+            } else if (bitdepth_ == 16) {
+                if (flip)
+                    subfiles.push_back(EigerBot<uint16_t>(
+                        data_fname(i, 0), subfile_rows_, subfile_cols_));
+                else
+                    subfiles.push_back(EigerTop<uint16_t>(
+                        data_fname(i, 0), subfile_rows_, subfile_cols_));
+
+            } else if (bitdepth_ == 8) {
+                if (flip)
+                    subfiles.push_back(EigerBot<uint8_t>(
+                        data_fname(i, 0), subfile_rows_, subfile_cols_));
+                else
+                    subfiles.push_back(EigerTop<uint8_t>(
+                        data_fname(i, 0), subfile_rows_, subfile_cols_));
+            } else {
+                throw std::runtime_error("Unrecognized bit depth");
+            }
 
         } else if (type_ == DetectorType::Jungfrau)
             subfiles.emplace_back(JungfrauRawFile(
                 data_fname(i, 0), subfile_rows_, subfile_cols_));
-        else if (type_ == DetectorType::Mythen3) 
+        else if (type_ == DetectorType::Mythen3)
             subfiles.push_back(EigerTop<uint32_t>(
                 data_fname(i, 0), subfile_rows_, subfile_cols_));
         else if (type_ == DetectorType::Moench)
             subfiles.emplace_back(Moench03RawFile(
                 data_fname(i, 0), subfile_rows_, subfile_cols_));
-         else
+        else
             throw std::runtime_error("File not supported");
     }
 }

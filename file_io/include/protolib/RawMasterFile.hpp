@@ -54,6 +54,7 @@ class RawMasterFile {
     int rows_{};
     int cols_{};
     uint8_t bitdepth_;
+    bool quad_{false};
 
     void find_number_of_subfiles();
     void parse_master_file();

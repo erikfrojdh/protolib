@@ -244,10 +244,6 @@ struct ReorderM03 : public RawFile<sls_detector_header, T, ReorderM03<T>> {
                 pixel++;
             }
         }
-        // for (size_t i = 0; i<ReorderM03::pixels_per_frame(); ++i)
-        //     dst[i] = tmp[i];
-
-        // memcpy(buffer, &tmp[0], ReorderM03::bytes_per_frame());
         return rc;
     }
 };
