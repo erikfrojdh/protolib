@@ -6,7 +6,7 @@ project(protolib
     HOMEPAGE_URL "https://github.com/erikfrojdh/protolib"
     LANGUAGES C CXX
 )
-
+cmake_policy(SET CMP0135 NEW)
 
 include(GNUInstallDirs)
 
@@ -27,6 +27,7 @@ option(USE_SANITIZER "Sanitizers for debugging" OFF)
 option(USE_TESTS "Unit tests" OFF)
 option(USE_PYTHON "Python bindings" OFF)
 option(TUNE_LOCAL "Tune to exact CPU architecture" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
 option(DISABLE_LTO "Disable Link Time Optimizations" OFF)
 
 add_library(project_options INTERFACE)
@@ -99,8 +100,9 @@ add_subdirectory(array)
 add_subdirectory(core)
 add_subdirectory(file_io)
 add_subdirectory(processing)
-add_subdirectory(examples)
-
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 if(USE_PYTHON)
     find_package (Python 3.6 COMPONENTS Interpreter Development)
     find_package(pybind11 2.7 REQUIRED)

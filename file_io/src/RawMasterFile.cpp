@@ -228,7 +228,6 @@ void RawMasterFile::parse_master_file() {
                     bitdepth_ = std::stoi(value);
                 } else if (key == "Quad") {
                     quad_ = (value == "1");
-                    std::cout << "Quad: " << quad_ << "\n";
                 }
             }
         }
@@ -275,7 +274,7 @@ FileInfo RawMasterFile::file_info() const {
 
 void RawMasterFile::open_subfiles() {
     for (int i = 0; i != n_subfiles_; ++i) {
-        fmt::print("{}: {}\n", i, data_fname(i, 0).c_str());
+        // fmt::print("{}: {}\n", i, data_fname(i, 0).c_str());
         if (type_ == DetectorType::Eiger) {
             bool flip = positions[i].row % 2;
             if (quad_)
