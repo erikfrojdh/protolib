@@ -1,5 +1,6 @@
 #include "protolib/DataType.hpp"
 #include <string_view>
+#include <cstdint>
 namespace pl {
 
 DataType::DataType(const std::type_info &t) {
