@@ -9,7 +9,7 @@ project(protolib
 cmake_policy(SET CMP0135 NEW)
 
 include(GNUInstallDirs)
-
+include(FetchContent)
 include(cmake/protolib_helpers.cmake)
 default_build_type("Release")
 
@@ -19,9 +19,17 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")  #TODO! This is Linux specific
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPLDEBUG")
 
 #Should we force this on the top level?
-find_package(fmt 6 REQUIRED)
-find_package(TBB REQUIRED)
 find_package(Threads REQUIRED)
+
+
+FetchContent_Declare(fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 10.2.0
+)
+FetchContent_MakeAvailable(fmt)
+set_property(TARGET fmt PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+
 
 option(USE_SANITIZER "Sanitizers for debugging" OFF)
 option(USE_TESTS "Unit tests" OFF)
@@ -83,7 +91,6 @@ endif()
 
 set(PublicHeaders "")
 
-include(FetchContent)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
@@ -124,7 +131,6 @@ PRIVATE
     nlohmann_json::nlohmann_json
 PUBLIC
     fmt::fmt 
-    TBB::tbb
     Threads::Threads
 )
 

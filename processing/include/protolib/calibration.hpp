@@ -5,8 +5,8 @@
 #include "protolib/defs.hpp"
 #include "protolib/utils.hpp"
 
-#include <tbb/parallel_for.h>
-#include <tbb/flow_graph.h>
+//#include <tbb/parallel_for.h>
+//#include <tbb/flow_graph.h>
 #include <future>
 namespace pl {
 
@@ -54,22 +54,22 @@ ImageData<T> sum_raw_frames(Iterator first, Iterator last,
     ImageData<T> total(first->shape());
     for (; first != last; ++first) {
         auto raw_data = first->template view<uint16_t>();
-        tbb::parallel_for(tbb::blocked_range<int>(0, raw_data.shape(0)),
-                          [&](tbb::blocked_range<int> r) {
-                              for (int row = r.begin(); row < r.end(); ++row) {
-                                  for (ssize_t col = 0;
-                                       col != raw_data.shape(1); ++col) {
-                                      const auto pixel = raw_data(row, col);
-                                      const auto gain = get_gain(pixel);
-                                      const auto adc_val = get_value(pixel);
-                                      T val = (static_cast<T>(adc_val) -
-                                               pedestal(gain, row, col)) /
-                                              calibration(gain, row, col);
-                                      if (val > threshold)
-                                          total(row, col) += val;
-                                  }
-                              }
-                          });
+//        tbb::parallel_for(tbb::blocked_range<int>(0, raw_data.shape(0)),
+//                          [&](tbb::blocked_range<int> r) {
+//                              for (int row = r.begin(); row < r.end(); ++row) {
+//                                  for (ssize_t col = 0;
+//                                       col != raw_data.shape(1); ++col) {
+//                                      const auto pixel = raw_data(row, col);
+//                                      const auto gain = get_gain(pixel);
+//                                      const auto adc_val = get_value(pixel);
+ //                                     T val = (static_cast<T>(adc_val) -
+//                                               pedestal(gain, row, col)) /
+//                                              calibration(gain, row, col);
+//                                      if (val > threshold)
+//                                          total(row, col) += val;
+//                                  }
+//                              }
+//                          });
     }
     return total;
 }

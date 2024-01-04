@@ -11,7 +11,7 @@ Maybe if both are expensive?
 #include <future>
 
 #include "protolib/SimpleQueue.hpp"
-#include <tbb/parallel_for.h>
+//#include <tbb/parallel_for.h>
 
 using namespace pl;
 namespace fs = std::filesystem;
@@ -35,12 +35,12 @@ ImageData<AccType> sum_frames(SimpleQueue<Frame> *q, size_t total_frames) {
         while (!q->pop(img))
             ;
         auto current = img.view<uint16_t>();
-        tbb::parallel_for(tbb::blocked_range<int>(0, current.size()),
-                          [&](tbb::blocked_range<int> r) {
-                              for (int j = r.begin(); j < r.end(); ++j) {
-                                total(j) += current(j);
-                              }
-                          });
+        //tbb::parallel_for(tbb::blocked_range<int>(0, current.size()),
+        //                  [&](tbb::blocked_range<int> r) {
+        //                      for (int j = r.begin(); j < r.end(); ++j) {
+        //                        total(j) += current(j);
+        //                      }
+        //                  });
     }
     return total;
 }
