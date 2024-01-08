@@ -10,6 +10,7 @@ set(ExampleSrc
     e6_benchmark.cpp
     e7_save_numpy.cpp
     e8_benchmark_pixelsum.cpp
+    e9_moench03.cpp
 )
 
 foreach(FILE ${ExampleSrc})
